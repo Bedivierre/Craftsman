@@ -9,7 +9,9 @@ use Bedivierre\Craftsman\Utility;
 
 require_once "../vendor/autoload.php";
 $r = new \Bedivierre\Craftsman\Masonry\BaseDataObject();
-$r[] = '22';
+$r[0] = '22';
+$r[1] = '22';
+$r[2] = '22';
 echo $r[0];
 
 
