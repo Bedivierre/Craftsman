@@ -199,7 +199,10 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        $this->addMember((string)$offset, $value);
+        if($offset == null)
+            $this->_data[] = $value;
+        else
+            $this->addMember((string)$offset, $value);
     }
     /**
      * Offset to unset
