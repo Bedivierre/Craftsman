@@ -202,7 +202,7 @@ class BaseDataObject implements \Iterator, \ArrayAccess
         if($offset == null)
             $this->_data[] = $value;
         else
-            $this->addMember((string)$offset, $value);
+            $this->addMember((string)$offset, $value, false);
     }
     /**
      * Offset to unset
