@@ -1,8 +1,8 @@
 <?php
 
 
-namespace Bedivierre\Craftsman\Joiner;
-use Bedivierre\Craftsman\Carpenter\BaseDataObject;
+namespace Bedivierre\Craftsman\Aqueduct;
+use Bedivierre\Craftsman\Masonry\BaseDataObject;
 
 /**
  * Class BaseResponseObject

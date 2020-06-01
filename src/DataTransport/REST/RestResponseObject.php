@@ -1,12 +1,12 @@
 <?php
 
 
-namespace Bedivierre\Craftsman\DataTransport\REST;
+namespace Bedivierre\Craftsman\Aqueduct\REST;
 
 
-use Bedivierre\Craftsman\Joiner\BaseResponseObject;
+use Bedivierre\Craftsman\Aqueduct\BaseResponseObject;
 
-class RestPesponseObject extends BaseResponseObject
+class RestResponseObject extends BaseResponseObject
 {
 
     public function __construct($data, string $url = '', string $method = 'post')

@@ -1,7 +1,7 @@
 <?php
 namespace Bedivierre\Craftsman;
-use Bedivierre\Craftsman\Joiner\BaseResponseObject;
-use Bedivierre\Craftsman\Joiner\BaseRequestObject;
+use Bedivierre\Craftsman\Aqueduct\BaseResponseObject;
+use Bedivierre\Craftsman\Aqueduct\BaseRequestObject;
 
 class Utility
 {
@@ -37,12 +37,14 @@ class Utility
         }
         return null;
     }
+
     /**
-     * @param $url
-     * @param $data
-     * @return BaseResponseObject|null
+     * Производит POST-запрос по указанному адресу с указанными данными.
+     * @param string $url Адрес обращения запроса
+     * @param array $data Массив данных, отправляемых в POST-запросе.
+     * @return BaseResponseObject|null Возвращает объект типа BaseResponseObject, представляющий результат запроса.
      */
-    public static function post($url, $data){
+    public static function post(string $url, array $data){
         $query = http_build_query($data);
         $ch = curl_init();
         $defaults = array(
@@ -65,13 +67,13 @@ class Utility
         curl_close($ch);
         return new BaseResponseObject($json, $url, 'post');
     }
-
     /**
-     * @param $url
-     * @param $data
-     * @return BaseResponseObject|null
+     * Производит GET-запрос по указанному адресу с указанными параметрами.
+     * @param string $url Адрес обращения запроса
+     * @param array $data Массив данных, отправляемых в GET-запросе.
+     * @return BaseResponseObject|null Возвращает объект типа BaseResponseObject, представляющий результат запроса.
      */
-    public static function get($url, $data){
+    public static function get(string $url, array $data){
         $query = http_build_query($data);
         $ch = curl_init();
         $uri = $url."?".$query;
@@ -92,7 +94,6 @@ class Utility
         curl_close($ch);
         return new BaseResponseObject($json, $uri, 'get');
     }
-
     /**
      * Возвращает новый объект ответа с ошибкой.
      * @param string $text Текст ошибки
@@ -104,19 +105,5 @@ class Utility
         $r = new BaseResponseObject('', $url, $method);
         $r->setError($text);
         return $r;
-    }
-
-
-    public static function runRequest(BaseRequestObject $request)
-    {
-        if($request->getMethod() == 'post') {
-            return self::post($request->getHost(), $request->buildQuery());
-        }elseif ($request->getMethod() == 'get'){
-            return self::get($request->getHost(), $request->buildQuery());
-        } else {
-            return self::createErrorResponse(
-                "Неверный метод отправки данных :".$request->getMethod(),
-                $request->getHost());
-        }
     }
 }

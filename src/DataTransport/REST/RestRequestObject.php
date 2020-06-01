@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Bedivierre\Craftsman\DataTransport\REST;
+namespace Bedivierre\Craftsman\Aqueduct\REST;
 
 
-use Bedivierre\Craftsman\Joiner\BaseRequestObject;
+use Bedivierre\Craftsman\Aqueduct\BaseRequestObject;
 
 class RestRequestObject extends BaseRequestObject
 {

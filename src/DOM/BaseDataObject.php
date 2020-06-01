@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Bedivierre\Craftsman\Carpenter;
+namespace Bedivierre\Craftsman\Masonry;
 
 class BaseDataObject implements \Iterator, \ArrayAccess
 {

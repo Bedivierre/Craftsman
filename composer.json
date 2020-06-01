@@ -22,9 +22,9 @@
     "autoload": {
         "psr-4": {
             "Bedivierre\\Craftsman\\" : "src/",
-            "Bedivierre\\Craftsman\\Carpenter\\" : "src/DOM/",
-            "Bedivierre\\Craftsman\\Joiner\\" : "src/DataTransport/",
-            "Bedivierre\\Craftsman\\Joiner\\REST\\" : "src/DataTransport/REST/"
+            "Bedivierre\\Craftsman\\Masonry\\" : "src/DOM/",
+            "Bedivierre\\Craftsman\\Aqueduct\\" : "src/DataTransport/",
+            "Bedivierre\\Craftsman\\Aqueduct\\REST\\" : "src/DataTransport/REST/"
         }
     }
 }

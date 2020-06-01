@@ -1,10 +1,10 @@
 <?php
 
-use Bedivierre\Craftsman\Carpenter\BaseDataObject;
-use Bedivierre\Craftsman\DataTransport\REST\RestPesponseObject;
-use Bedivierre\Craftsman\DataTransport\REST\RestRequestObject;
-use Bedivierre\Craftsman\Joiner\BaseRequestObject;
-use Bedivierre\Craftsman\Joiner\BaseResponseObject;
+use Bedivierre\Craftsman\Masonry\BaseDataObject;
+use Bedivierre\Craftsman\Aqueduct\REST\RestResponseObject;
+use Bedivierre\Craftsman\Aqueduct\REST\RestRequestObject;
+use Bedivierre\Craftsman\Aqueduct\BaseRequestObject;
+use Bedivierre\Craftsman\Aqueduct\BaseResponseObject;
 use Bedivierre\Craftsman\Utility;
 
 require_once "../vendor/autoload.php";
@@ -32,7 +32,7 @@ function rest_get($url, $data, $method = 'get'){
         return Utility::createErrorResponse('Ошибка при запросе: ' . curl_error($ch), $uri, 'get');
     }
     curl_close($ch);
-    return new RestPesponseObject($json, $uri, $method);
+    return new RestResponseObject($json, $uri, $method);
 }
 
 $l->setMethod('custom', function ($d, BaseRequestObject $r){

@@ -1,7 +1,7 @@
 <?php
-namespace Bedivierre\Craftsman\Joiner;
+namespace Bedivierre\Craftsman\Aqueduct;
 
-use Bedivierre\Craftsman\Carpenter\BaseDataObject;
+use Bedivierre\Craftsman\Masonry\BaseDataObject;
 use Bedivierre\Craftsman\Utility;
 
 /**
