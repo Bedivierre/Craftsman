@@ -41,7 +41,7 @@ class BaseRequestObject extends BaseDataObject
      * Возвращает функцию отправки запроса. Устанавливается она в setMethod.
      * @return Callable|null
      */
-    public function getMethodFunc(): string
+    public function getMethodFunc(): Callable
     {
         return $this->_method->func;
     }
@@ -49,17 +49,18 @@ class BaseRequestObject extends BaseDataObject
      * Указывает название и функцию отправки запроса. По умолчанию используется метод POST по адресу getHost()
      * @param string $method Имя для метода передачи.
      * @param callable|null $func Функция, используемая при передаче данных. Если null, используется значение по
-     * умолчанию. В функцию будет передаваться результат функции getRequestData и сам объект запроса.
+     * умолчанию. В функцию будет передаваться результат функции getRequestData и сам объект запроса. Метод должен
+     * возвращать экземпляр BaseResponseObject
      */
     public function setMethod(string $method, Callable $func = null)
     {
         $m = new BaseDataObject();
-        if($func == null || mb_strtolower($method) == 'post') {
-            $m->type = 'post';
-            $m->func = function() {$this->requestPost();};
-        } else if(mb_strtolower($method) == 'get') {
+        if(mb_strtolower($method) == 'get') {
             $m->type = 'get';
-            $m->func = function() {$this->requestGet();};
+            $m->func = function($d, BaseRequestObject $r) {return $this->requestGet($d, $r);};
+        } else if($func == null || mb_strtolower($method) == 'post') {
+            $m->type = 'post';
+            $m->func = function($d, BaseRequestObject $r) {return $this->requestPost($d, $r);};
         } else {
             $m->type = $method;
             $m->func = $func;
@@ -76,21 +77,24 @@ class BaseRequestObject extends BaseDataObject
     {
         return $this->toArray();
     }
-
     /**
      * Делает запрос с помощью указанной в getMethodFunc функции.
      * @return BaseResponseObject
      */
     public function doRequest(){
-        if(is_callable($cb = $this->getMethodFunc()))
-            return $cb($this->getRequestData(), $this);
+        if(is_callable($cb = $this->getMethodFunc())) {
+            $ret = $cb($this->getRequestData(), $this);
+            return $ret;
+        }
         return Utility::createErrorResponse("Не указана функция отправки данных", $this->getHost());
     }
 
-    private function requestPost($data, BaseRequestObject $request){
-        return Utility::post($this->getHost(), $data);
+    private function requestPost($data, BaseRequestObject $request) : BaseResponseObject {
+        $ret = Utility::post($this->getHost(), $data);
+        return $ret;
     }
-    private function requestGet($data, BaseRequestObject $request){
-        return Utility::get($this->getHost(), $data);
+    private function requestGet($data, BaseRequestObject $request) : BaseResponseObject {
+        $ret = Utility::get($this->getHost(), $data);
+        return $ret;
     }
 }

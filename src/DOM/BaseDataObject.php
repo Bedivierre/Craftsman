@@ -3,7 +3,7 @@
 
 namespace Bedivierre\Craftsman\Carpenter;
 
-class BaseDataObject implements \Iterator
+class BaseDataObject implements \Iterator, \ArrayAccess
 {
 
     /**
@@ -97,24 +97,6 @@ class BaseDataObject implements \Iterator
         return  $ret;
     }
 
-    // Реализация интерфейса Iterator
-    function rewind() {
-        return reset($this->_data);
-    }
-    function current() {
-        return current($this->_data);
-    }
-    function key() {
-        return key($this->_data);
-    }
-    function next() {
-        return next($this->_data);
-    }
-    function valid() {
-        return key($this->_data) !== null;
-    }
-    //Конец реализации интерфейса Iterator
-
     /**
      * @param string|array $data Данные, которые передаются в объект данных. По умолчанию должно
      * быть массивом или строкой JSON, но формат входных данных может быть переопределен
@@ -156,4 +138,80 @@ class BaseDataObject implements \Iterator
             return null;
         return is_array($data) ? $data : json_decode($data, true);
     }
+
+
+    // Реализация интерфейса Iterator
+    function rewind() {
+        return reset($this->_data);
+    }
+    function current() {
+        return current($this->_data);
+    }
+    function key() {
+        return key($this->_data);
+    }
+    function next() {
+        return next($this->_data);
+    }
+    function valid() {
+        return key($this->_data) !== null;
+    }
+    // Конец реализации интерфейса Iterator
+
+    // Реализация интерфейса ArrayAccess
+    /**
+     * Whether a offset exists
+     * @link https://php.net/manual/en/arrayaccess.offsetexists.php
+     * @param mixed $offset <p>
+     * An offset to check for.
+     * </p>
+     * @return bool true on success or false on failure.
+     * </p>
+     * <p>
+     * The return value will be casted to boolean if non-boolean was returned.
+     */
+    public function offsetExists($offset)
+    {
+        return $this->exists((string) $offset);
+    }
+    /**
+     * Offset to retrieve
+     * @link https://php.net/manual/en/arrayaccess.offsetget.php
+     * @param mixed $offset <p>
+     * The offset to retrieve.
+     * </p>
+     * @return mixed Can return all value types.
+     */
+    public function offsetGet($offset)
+    {
+        return $this->getMember((string) $offset);
+    }
+    /**
+     * Offset to set
+     * @link https://php.net/manual/en/arrayaccess.offsetset.php
+     * @param mixed $offset <p>
+     * The offset to assign the value to.
+     * </p>
+     * @param mixed $value <p>
+     * The value to set.
+     * </p>
+     * @return void
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->addMember((string)$offset, $value);
+    }
+    /**
+     * Offset to unset
+     * @link https://php.net/manual/en/arrayaccess.offsetunset.php
+     * @param mixed $offset <p>
+     * The offset to unset.
+     * </p>
+     * @return void
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->_data[$offset]);
+    }
+    // Конец реализации интерфейса ArrayAccess
 }

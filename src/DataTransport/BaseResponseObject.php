@@ -21,11 +21,7 @@ class BaseResponseObject extends BaseDataObject
     public function __construct($data, string $url = '', string $method = 'post')
     {
         $this->_url = $url;
-        $methods = ['post', 'get'];
-        if(in_array(strtolower($method), $methods))
-            $this->_method = $method;
-        else
-            $this->_method = $methods[0];
+        $this->_method = $method;
         $this->_errorMessage = '';
         $this->_errorCode = 0;
         parent::__construct($data);
