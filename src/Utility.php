@@ -87,7 +87,7 @@ class Utility
         if(curl_error($ch))
         {
             curl_close($ch);
-            return self::createErrorResponse('Ошибка при запросе: ' . curl_error($ch), $uri);
+            return self::createErrorResponse('Ошибка при запросе: ' . curl_error($ch), $uri, 'get');
         }
         curl_close($ch);
         return new BaseResponseObject($json, $uri, 'get');
@@ -99,9 +99,9 @@ class Utility
      * @param string $url URL запроса, вернувшего ошибку.
      * @return BaseResponseObject
      */
-    public static function createErrorResponse(string $text, string $url)
+    public static function createErrorResponse(string $text, string $url, string $method = 'post')
     {
-        $r = new BaseResponseObject('', $url);
+        $r = new BaseResponseObject('', $url, $method);
         $r->setError($text);
         return $r;
     }

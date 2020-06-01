@@ -11,7 +11,7 @@ use Bedivierre\Craftsman\Carpenter\BaseDataObject;
 class BaseResponseObject extends BaseDataObject
 {
     const ERR_OK = 0;
-    const ERR_UNKNOWN = 1;
+    const ERR_UNKNOWN = -1;
 
     /**
      * @param string|array $data Тело ответа, как правило, строка JSON

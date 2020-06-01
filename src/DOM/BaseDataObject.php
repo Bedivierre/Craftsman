@@ -30,13 +30,16 @@ class BaseDataObject implements \Iterator
      * Безопасно добавляет свойство в объект.
      * @param string $name Имя нового свойства.
      * @param null|mixed $value Значение свойства.
+     * @param bool $convertArrays Указывает, нужно ли преобразовать массивы в объекты BaseDataObject
      * @param bool $overwrite Указывает, что свойство должно быть перезаписано, если существует.
      */
-    public function addMember(string $name, $value = null, bool $overwrite = true)
+    public function addMember(string $name, $value = null, bool $convertArrays = true, bool $overwrite = true)
     {
         if($this->exists($name) && !$overwrite)
             return;
-        $this->_data[$name] = $value;
+        $v = is_array($value) && $convertArrays ? new BaseDataObject($value) : $value;
+
+        $this->_data[$name] = $v;
     }
     /**
      * Получает свойство из объекта. Прие его отсутствии возвращает null.
@@ -65,7 +68,6 @@ class BaseDataObject implements \Iterator
     public function exists(string $name){
         return isset($this->_data[$name]);
     }
-
     /**
      * Возвращает количество свойств объекта.
      * @return int
@@ -139,19 +141,10 @@ class BaseDataObject implements \Iterator
         if($newdata)
             $this->_data = [];
 
-        foreach ($arr as $key => $value)
-        {
-            if(!$overwrite && $this->exists($key))
-                continue;
-            if(!is_array($value)) {
-                $this->{$key} = $value;
-            }
-            else {
-                $this->{$key} = new BaseDataObject($value);
-            }
+        foreach ($arr as $key => $value){
+            $this->addMember($key, $value, true, $overwrite);
         }
     }
-
     /**
      * Функция для обработки входных данных объекта. Должна возвращать массив.
      * @param mixed $data Данные, передаваемые при создании объекта.
