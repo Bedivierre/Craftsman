@@ -1,5 +1,7 @@
 <?php
 namespace Bedivierre\Craftsman;
+use Bedivierre\Craftsman\Joiner\BaseResponseObject;
+use Bedivierre\Craftsman\Joiner\BaseRequestObject;
 
 class Utility
 {

@@ -15,7 +15,8 @@
     },
     "require": {
         "php": ">=7.1",
-        "vlucas/phpdotenv": "^4.1"
+        "vlucas/phpdotenv": "^4.1",
+        "ext-curl": "*"
     },
     "autoload": {
         "psr-4": {
