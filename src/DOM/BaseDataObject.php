@@ -172,7 +172,7 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      */
     public function offsetExists($offset)
     {
-        return $this->exists((string) $offset);
+        return $this->exists($offset);
     }
     /**
      * Offset to retrieve
@@ -184,7 +184,7 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      */
     public function offsetGet($offset)
     {
-        return $this->getMember((string) $offset);
+        return $this->getMember($offset);
     }
     /**
      * Offset to set
@@ -199,7 +199,7 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        $this->addMember((string)$offset, $value);
+        $this->addMember($offset, $value);
     }
     /**
      * Offset to unset
