@@ -107,9 +107,30 @@ class BaseDataObject implements \Iterator, \ArrayAccess
         return  $ret;
     }
 
+    /**
+     * Возвращает копию объекта.
+     * @return self
+     */
     public function copy()
     {
         return clone $this;
+    }
+
+    /**
+     * Возвращает копию объекта, свойства которого со свойствами объекта $obj
+     * @param BaseDataObject $obj Добавляемый объект.
+     * @param bool $overwrite Указывает, надо ли перезапиывать свойства, если текущий объект уже имеет свойство с таким именем.
+     * @return self
+     */
+    public function merge(BaseDataObject $obj, bool $overwrite = false)
+    {
+        $res = $this->copy();
+        foreach ($obj as $key => $value)
+        {
+            if(!isset($res->_data[$key]) || $overwrite)
+                $res->_data[$key] = $value;
+        }
+        return $res;
     }
 
     /**
