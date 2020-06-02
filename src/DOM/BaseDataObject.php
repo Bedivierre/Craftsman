@@ -184,11 +184,16 @@ class BaseDataObject implements \Iterator, \ArrayAccess
     public function apply_data($data, $overwrite = true, $newdata = false)
     {
         $arr =  $this->getArrayFromInputData($data);
-        if(!$arr || !is_array($arr))
+        if(!$arr || !is_array($arr) || !($data instanceof BaseDataObject))
             return;
 
         if($newdata)
             $this->_data = [];
+        if($data instanceof BaseDataObject){
+            $this->absorb($data, true);
+            return;
+        }
+
 
         foreach ($arr as $key => $value){
             $this->addMember($key, $value, true, $overwrite);
