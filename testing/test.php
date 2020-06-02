@@ -11,15 +11,18 @@ require_once "../vendor/autoload.php";
 $r = new BaseDataObject();
 $r[] = '44';
 $r[1] = new BaseDataObject();
+$r->sss = 'w';
+$r->ddd = 's';
 $r[1]->s = 'qwerty';
-$r[2] = '22';
-$r[] = '11';
 
-$d = $r->copy();
-$r[0] = 345678;
-echo $r[0];
-
+$d = new BaseDataObject();
+$d->ddd = 'werrt';
+$d->qqq = 'qwerty';
+$d[1] = new BaseDataObject();
 $d[1]->s = 'GTRE';
+
+$r->absorb($d, true);
+$r[1]->s = 'ertyu';
 
 echo $r[0];
 

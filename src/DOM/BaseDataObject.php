@@ -134,6 +134,37 @@ class BaseDataObject implements \Iterator, \ArrayAccess
     }
 
     /**
+     * Поглощает данные передаваемого объекта. Свойства объекта копируются в текущий.
+     * @param BaseDataObject $obj Поглощаемый объект
+     * @param bool $overwrite Указывает, нужно ли перезаписывать поля.
+     * @param bool $overwritePrivate Указывает, нужно ли перезаписывать приватные свойства (начинающиеся с символа
+     * подчеркивания "_")
+     */
+    public function absorb(BaseDataObject $obj, bool $overwrite = false, bool $overwritePrivate = false)
+    {
+        foreach ($obj as $key => $value)
+        {
+            $v = is_object($value) ? clone $value : $value;
+            if(!$this->offsetExists($key)){
+                $this[$key] = $v;
+                continue;
+            }
+            if(!$overwrite && !$overwritePrivate)
+                continue;
+            if(!is_string($key)) {
+                if ($overwrite){
+                    $this[$key] = $v;
+                }
+                continue;
+            }
+            $check = substr($key, 0, 1) == '_' ? $overwritePrivate : $overwrite;
+            if($check){
+                $this[$key] = $v;
+            }
+        }
+    }
+
+    /**
      * @param string|array $data Данные, которые передаются в объект данных. По умолчанию должно
      * быть массивом или строкой JSON, но формат входных данных может быть переопределен
      * в наследующих классах при помощи функции getArrayFromInputData.
@@ -208,7 +239,7 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      */
     public function offsetExists($offset)
     {
-        return $this->exists((string)$offset);
+        return isset($this->_data[$offset]);
     }
     /**
      * Offset to retrieve
@@ -220,7 +251,9 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      */
     public function offsetGet($offset)
     {
-        return $this->getMember((string)$offset);
+        if(isset($this->_data[$offset]))
+            return $this->_data[$offset];
+        return null;
     }
     /**
      * Offset to set
@@ -250,7 +283,7 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      */
     public function offsetUnset($offset)
     {
-        $this->removeMember((string)$offset);
+        unset($this->_data[$offset]);
     }
     // Конец реализации интерфейса ArrayAccess
 }
