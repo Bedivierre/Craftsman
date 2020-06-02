@@ -25,6 +25,16 @@ class BaseDataObject implements \Iterator, \ArrayAccess
     {
         $this->removeMember($name);
     }
+    public function __clone()
+    {
+        foreach($this->_data as $key => $value)
+        {
+            if(is_object($value))
+                $this->_data[$key] = clone $value;
+            else
+                $this->_data[$key] = $value;
+        }
+    }
 
     /**
      * Безопасно добавляет свойство в объект.
@@ -95,6 +105,11 @@ class BaseDataObject implements \Iterator, \ArrayAccess
             }
         }
         return  $ret;
+    }
+
+    public function copy()
+    {
+        return clone $this;
     }
 
     /**
@@ -199,10 +214,10 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        if($offset == null)
+        if(is_null($offset))
             $this->_data[] = $value;
         else
-            $this->addMember((string)$offset, $value, false);
+            $this->_data[$offset] = $value;
     }
     /**
      * Offset to unset
