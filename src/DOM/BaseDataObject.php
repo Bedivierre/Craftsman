@@ -184,7 +184,7 @@ class BaseDataObject implements \Iterator, \ArrayAccess
     public function apply_data($data, $overwrite = true, $newdata = false)
     {
         $arr =  $this->getArrayFromInputData($data);
-        if(!$arr || !is_array($arr) || !($data instanceof BaseDataObject))
+        if(!$arr || !is_array($arr))
             return;
 
         if($newdata)
@@ -206,8 +206,10 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      */
     protected function getArrayFromInputData($data)
     {
-        if(!is_string($data) && !is_array($data))
+        if(!is_string($data) && !is_array($data) && !($data instanceof BaseDataObject))
             return null;
+        if($data instanceof BaseDataObject)
+            return $data->toArray();
         return is_array($data) ? $data : json_decode($data, true);
     }
 
