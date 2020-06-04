@@ -10,6 +10,7 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      * @var array $_data
      */
     private $_data = [];
+    private $_private_data = [];
 
     public function __get(string $name){
         return $this->getMember($name);
@@ -34,6 +35,13 @@ class BaseDataObject implements \Iterator, \ArrayAccess
             else
                 $this->_data[$key] = $value;
         }
+        foreach($this->_private_data as $key => $value)
+        {
+            if(is_object($value))
+                $this->_private_data[$key] = clone $value;
+            else
+                $this->_private_data[$key] = $value;
+        }
     }
 
     /**
@@ -45,11 +53,30 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      */
     public function addMember(string $name, $value = null, bool $convertArrays = true, bool $overwrite = true)
     {
+        if(substr($name, 0, 1) == '_'){
+            $this->addPrivate($name, $value, $convertArrays, $overwrite);
+            return;
+        }
         if($this->exists($name) && !$overwrite)
             return;
         $v = is_array($value) && $convertArrays ? new BaseDataObject($value) : $value;
 
         $this->_data[$name] = $v;
+    }
+    /**
+     * Безопасно добавляет приватное свойство в объект.
+     * @param string $name Имя нового свойства.
+     * @param null|mixed $value Значение свойства.
+     * @param bool $convertArrays Указывает, нужно ли преобразовать массивы в объекты BaseDataObject
+     * @param bool $overwrite Указывает, что свойство должно быть перезаписано, если существует.
+     */
+    public function addPrivate(string $name, $value = null, bool $convertArrays = true, bool $overwrite = true)
+    {
+        if($this->existsPrivate($name) && !$overwrite)
+            return;
+        $v = is_array($value) && $convertArrays ? new BaseDataObject($value) : $value;
+
+        $this->_private_data[$name] = $v;
     }
     /**
      * Получает свойство из объекта. Прие его отсутствии возвращает null.
@@ -58,8 +85,22 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      */
     public function getMember(string $name)
     {
-        if($this->exists($name))
+        if(substr($name, 0, 1) == '_'){
+            return $this->getPrivate($name);
+        }
+        if(isset($this->_data[$name]))
             return $this->_data[$name];
+        return null;
+    }
+    /**
+     * Получает приватное свойство из объекта. Прие его отсутствии возвращает null.
+     * @param string $name Имя получаемого свойства.
+     * @return mixed|null
+     */
+    public function getPrivate(string $name)
+    {
+        if(isset($this->_private_data[$name]))
+            return $this->_private_data[$name];
         return null;
     }
     /**
@@ -68,7 +109,19 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      */
     public function removeMember(string $name)
     {
+        if(substr($name, 0, 1) == '_'){
+            $this->removePrivate($name);
+            return;
+        }
         unset($this->_data[$name]);
+    }
+    /**
+     * Удаляет приватное свойство из объекта.
+     * @param string $name Имя удаляемого свойства.
+     */
+    public function removePrivate(string $name)
+    {
+        unset($this->_private_data[$name]);
     }
     /**
      * Указывает, есть ли свойство с таким именем в объекте.
@@ -76,7 +129,18 @@ class BaseDataObject implements \Iterator, \ArrayAccess
      * @return bool
      */
     public function exists(string $name){
+        if(substr($name, 0, 1) == '_'){
+            return $this->existsPrivate($name);
+        }
         return isset($this->_data[$name]);
+    }
+    /**
+     * Указывает, есть ли приватное свойство с таким именем в объекте.
+     * @param string $name Имя искомого объекта.
+     * @return bool
+     */
+    public function existsPrivate(string $name){
+        return isset($this->_private_data[$name]);
     }
     /**
      * Возвращает количество свойств объекта.
@@ -85,84 +149,16 @@ class BaseDataObject implements \Iterator, \ArrayAccess
     public function count(){
         return count($this->_data);
     }
-
     /**
-     * Возвращает этот объект в виде массива.
-     * @param bool $usePrivate Определяет, оставлять в результирующем массиве приватные свойства или нет.
-     * Приватными свойствами считаются свойства, имя которых начинается со знака подчёркивания ("_")
-     * @return array
+     * Возвращает количество приватных свойств объекта.
+     * @return int
      */
-    public function toArray($usePrivate = false){
-        $ret = [];
-        foreach ($this->_data as $key => $value)
-        {
-            if(substr($key, 0, 1) != '_' || $usePrivate){
-                if($value instanceof BaseDataObject){
-                    $ret[$key] = $value->toArray();
-                } else {
-                    $ret[$key] = $value;
-                }
-            }
-        }
-        return  $ret;
+    public function countPrivate(){
+        return count($this->_private_data);
     }
 
-    /**
-     * Возвращает копию объекта.
-     * @return self
-     */
-    public function copy()
-    {
-        return clone $this;
-    }
 
-    /**
-     * Возвращает копию объекта, свойства которого со свойствами объекта $obj
-     * @param BaseDataObject $obj Добавляемый объект.
-     * @param bool $overwrite Указывает, надо ли перезапиывать свойства, если текущий объект уже имеет свойство с таким именем.
-     * @return self
-     */
-    public function merge(BaseDataObject $obj, bool $overwrite = false)
-    {
-        $res = $this->copy();
-        foreach ($obj as $key => $value)
-        {
-            if(!isset($res->_data[$key]) || $overwrite)
-                $res->_data[$key] = $value;
-        }
-        return $res;
-    }
 
-    /**
-     * Поглощает данные передаваемого объекта. Свойства объекта копируются в текущий.
-     * @param BaseDataObject $obj Поглощаемый объект
-     * @param bool $overwrite Указывает, нужно ли перезаписывать поля.
-     * @param bool $overwritePrivate Указывает, нужно ли перезаписывать приватные свойства (начинающиеся с символа
-     * подчеркивания "_")
-     */
-    public function absorb(BaseDataObject $obj, bool $overwrite = false, bool $overwritePrivate = false)
-    {
-        foreach ($obj as $key => $value)
-        {
-            $v = is_object($value) ? clone $value : $value;
-            if(!$this->offsetExists($key)){
-                $this[$key] = $v;
-                continue;
-            }
-            if(!$overwrite && !$overwritePrivate)
-                continue;
-            if(!is_string($key)) {
-                if ($overwrite){
-                    $this[$key] = $v;
-                }
-                continue;
-            }
-            $check = substr($key, 0, 1) == '_' ? $overwritePrivate : $overwrite;
-            if($check){
-                $this[$key] = $v;
-            }
-        }
-    }
 
     /**
      * @param string|array $data Данные, которые передаются в объект данных. По умолчанию должно
@@ -287,4 +283,135 @@ class BaseDataObject implements \Iterator, \ArrayAccess
         unset($this->_data[$offset]);
     }
     // Конец реализации интерфейса ArrayAccess
+
+
+    function _processProperties(\Closure $func, $obj, $includePrivate)
+    {
+        $func($obj, $this->_data);
+        if($includePrivate)
+            $func($obj, $this->_private_data);
+    }
+
+    /**
+     * Возвращает список ключей объекта.
+     * @param string $pattern Шаблон, по которому можно отсортировать ключи. Валидное регулярное выражение без
+     * ограничивающих символов.
+     * @param bool $includePrivate Указывает, добавлять ли в выбор приватные свойства объекта.
+     * @return BaseDataObject
+     */
+    public function keys($pattern = '', $includePrivate = false){
+        $bo = new BaseDataObject();
+        $this->_processProperties(function ($bo, $source) use ($pattern){
+            foreach ($source as $k=>$v){
+                if(preg_match("~$pattern~", $k))
+                    $bo[] = $k;
+            }
+        }, $bo, $includePrivate);
+        return $bo;
+    }
+
+    /**
+     * Возвращает список значений объекта.
+     * @param array $filter
+     * @param bool $includePrivate Указывает, добавлять ли в выбор приватные свойства объекта.
+     * @return BaseDataObject
+     */
+    public function values($filter = [], $includePrivate = false){
+        $bo = new BaseDataObject();
+        $this->_processProperties(function ($bo, $source) use ($filter){
+            foreach ($source as $v){
+                $bo[] = $v;
+            }
+        }, $bo, $includePrivate);
+        return $bo;
+    }
+
+    /**
+     * Возвращает этот объект в виде массива.
+     * @param bool $usePrivate Определяет, оставлять в результирующем массиве приватные свойства или нет.
+     * Приватными свойствами считаются свойства, имя которых начинается со знака подчёркивания ("_")
+     * @return array
+     */
+    public function toArray($includePrivate = false){
+        $ret = [];
+        $this->_processProperties(function ($includePrivate, $source)use(&$ret){
+            foreach ($source as $k=>$v){
+                if($v instanceof BaseDataObject) {
+                    $ret[$k] = $v->toArray($includePrivate);
+                } else if (is_object($v)){
+                    if(method_exists($v, 'toArray'))
+                        $ret[$k] = $v->toArray();
+                    else
+                        $ret[$k] = (array) $v;
+                } else {
+                    $ret[$k] = $k;
+                }
+            }
+        }, $includePrivate, $includePrivate);
+        return $ret;
+    }
+
+    /**
+     * Возвращает копию объекта.
+     * @return self
+     */
+    public function copy()
+    {
+        return clone $this;
+    }
+
+    /**
+     * Возвращает копию объекта, свойства которого объединены со свойствами объекта $obj
+     * @param BaseDataObject $obj Добавляемый объект.
+     * @param bool $overwrite Указывает, надо ли перезапиывать свойства, если текущий объект уже имеет свойство с таким именем.
+     * @return self
+     */
+    public function merge(BaseDataObject $obj, bool $overwrite = false, bool $includePrivate = false)
+    {
+        $res = $this->copy();
+        foreach ($obj as $key => $value)
+        {
+            if(!isset($res->_data[$key]) || $overwrite)
+                $res->_data[$key] = $value;
+        }
+        if($includePrivate){
+            foreach ($obj->_private_data as $key => $value)
+            {
+                if(!isset($res->_private_data[$key]) || $overwrite)
+                    $res->_private_data[$key] = $value;
+            }
+        }
+        return $res;
+    }
+
+    /**
+     * Поглощает данные передаваемого объекта. Свойства объекта копируются в текущий.
+     * @param BaseDataObject $obj Поглощаемый объект
+     * @param bool $overwrite Указывает, нужно ли перезаписывать поля.
+     * @param bool $includePrivate Указывает, нужно ли перезаписывать приватные свойства (начинающиеся с символа
+     * подчеркивания "_")
+     * @return self
+     */
+    public function absorb(BaseDataObject $obj, bool $overwrite = false, bool $includePrivate = false)
+    {
+        foreach ($obj as $key => $value){
+            if($overwrite || !isset($this[$key])) {
+                $this[$key] = is_object($value) ? clone $value : $value;
+            } else {
+                continue;
+            }
+        }
+        if($includePrivate){
+            foreach ($obj->_private_data as $key => $value){
+                if($overwrite || !isset($this->_private_data[$key])) {
+                    $this->_private_data[$key] = is_object($value) ? clone $value : $value;
+                } else {
+                    continue;
+                }
+            }
+        }
+        return $this;
+    }
+
+
 }
