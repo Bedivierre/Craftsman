@@ -23,6 +23,8 @@
         "psr-4": {
             "Bedivierre\\Craftsman\\" : "src/",
             "Bedivierre\\Craftsman\\Masonry\\" : "src/DOM/",
+            "Bedivierre\\Craftsman\\Appraise\\" : "src/DataAssert/",
+            "Bedivierre\\Craftsman\\Poetry\\" : "src/String/",
             "Bedivierre\\Craftsman\\Aqueduct\\" : "src/DataTransport/",
             "Bedivierre\\Craftsman\\Aqueduct\\REST\\" : "src/DataTransport/REST/"
         }
