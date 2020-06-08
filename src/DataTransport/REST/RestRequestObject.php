@@ -18,17 +18,4 @@ class RestRequestObject extends BaseRequestObject
     {
         parent::__construct($host, $method);
     }
-
-
-    /**
-     * Составляет, проверяет и возвращает массив для формирования запроса.
-     * @return array
-     */
-    protected function getRequestData()
-    {
-        $arr = $this->toArray();
-        if(!is_array($arr))
-            return [];
-        return $arr;
-    }
 }

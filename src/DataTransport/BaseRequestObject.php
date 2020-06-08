@@ -59,10 +59,10 @@ class BaseRequestObject extends BaseDataObject
         $m = new BaseDataObject();
         if(mb_strtolower($method) == 'get') {
             $m->type = 'get';
-            $m->func = is_callable($func) ? $func : function($d, BaseRequestObject $r) {return $this->requestGet($d, $r);};
+            $m->func = is_callable($func) ? $func : function(BaseDataObject $d, BaseRequestObject $r) {return $this->requestGet($d, $r);};
         } else if($func == null || mb_strtolower($method) == 'post') {
             $m->type = 'post';
-            $m->func = is_callable($func) ? $func : function($d, BaseRequestObject $r) {return $this->requestPost($d, $r);};
+            $m->func = is_callable($func) ? $func : function(BaseDataObject $d, BaseRequestObject $r) {return $this->requestPost($d, $r);};
         } else {
             $m->type = $method;
             $m->func = $func;
@@ -74,11 +74,11 @@ class BaseRequestObject extends BaseDataObject
     /**
      * Возвращает структурированные данные для запроса в виде массива. Эти данные будут отправляться в
      * в функцию запроса getMethodFunc.
-     * @return array
+     * @return BaseDataObject
      */
     protected function getRequestData()
     {
-        return $this->toArray();
+        return $this;
     }
     /**
      * Делает запрос с помощью указанной в getMethodFunc функции.
@@ -106,12 +106,14 @@ class BaseRequestObject extends BaseDataObject
     public function get(){
         return $this->requestGet($this->getRequestData(), $this);
     }
-    private function requestPost($data, BaseRequestObject $request) : BaseResponseObject {
-        $ret = Utility::postJson($this->getHost(), $data);
+    private function requestPost(BaseDataObject $data, BaseRequestObject $request) : BaseResponseObject {
+        $arr = $data->toArray();
+        $ret = Utility::postJson($this->getHost(), $arr);
         return $ret;
     }
-    private function requestGet($data, BaseRequestObject $request) : BaseResponseObject {
-        $ret = Utility::getJson($this->getHost(), $data);
+    private function requestGet(BaseDataObject $data, BaseRequestObject $request) : BaseResponseObject {
+        $arr = $data->toArray();
+        $ret = Utility::getJson($this->getHost(), $arr);
         return $ret;
     }
 }
