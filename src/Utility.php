@@ -42,9 +42,10 @@ class Utility
      * Производит POST-запрос по указанному адресу с указанными данными.
      * @param string $url Адрес обращения запроса
      * @param array $data Массив данных, отправляемых в POST-запросе.
-     * @return BaseResponseObject|null Возвращает объект типа BaseResponseObject, представляющий результат запроса.
+     * @return string|null Возвращает строку, представляющую результат запроса.
+     * @throws \Exception
      */
-    public static function post(string $url, array $data){
+    public static function post(string $url, array &$data){
         $query = http_build_query($data);
         $ch = curl_init();
         $defaults = array(
@@ -56,22 +57,37 @@ class Utility
         );
         curl_setopt_array($ch, $defaults);
 
-// загрузка страницы и выдача её браузеру
-        $json = curl_exec($ch);
+        $result = curl_exec($ch);
 
         if(curl_error($ch))
         {
             curl_close($ch);
-            return self::createErrorResponse('Ошибка при запросе: ' . curl_error($ch), $url);
+            throw new \Exception('Ошибка при запросе: ' . curl_error($ch));
         }
         curl_close($ch);
-        return new BaseResponseObject($json, $url, 'post');
+        return $result;
     }
+    /**
+     * Производит POST-запрос, ожидая получить JSON-строку, по указанному адресу с указанными данными.
+     * @param string $url Адрес обращения запроса
+     * @param array $data Массив данных, отправляемых в POST-запросе.
+     * @return BaseResponseObject|null Возвращает объект типа BaseResponseObject, представляющий результат запроса.
+     */
+    public static function postJson(string $url, array &$data){
+        try {
+            $json = self::post($url, $data);
+            return new BaseResponseObject($json, $url, 'post');
+        } catch (\Exception $ex){
+            return self::createErrorResponse('Ошибка при запросе: ' . $ex->getMessage(), $url, 'post');
+        }
+    }
+
     /**
      * Производит GET-запрос по указанному адресу с указанными параметрами.
      * @param string $url Адрес обращения запроса
      * @param array $data Массив данных, отправляемых в GET-запросе.
-     * @return BaseResponseObject|null Возвращает объект типа BaseResponseObject, представляющий результат запроса.
+     * @return string|null Возвращает строку, представляющую результат запроса.
+     * @throws \Exception
      */
     public static function get(string $url, array $data){
         $query = http_build_query($data);
@@ -84,15 +100,30 @@ class Utility
         );
         curl_setopt_array($ch, $defaults);
 
-// загрузка страницы и выдача её браузеру
-        $json = curl_exec($ch);
+        $result = curl_exec($ch);
+
         if(curl_error($ch))
         {
             curl_close($ch);
-            return self::createErrorResponse('Ошибка при запросе: ' . curl_error($ch), $uri, 'get');
+            throw new \Exception('Ошибка при запросе: ' . curl_error($ch));
         }
         curl_close($ch);
-        return new BaseResponseObject($json, $uri, 'get');
+        return $result;
+    }
+
+    /**
+     * Производит GET-запрос, ожидая получить JSON-строку, по указанному адресу с указанными данными.
+     * @param string $url Адрес обращения запроса
+     * @param array $data Массив данных, отправляемых в GET-запросе.
+     * @return BaseResponseObject|null Возвращает объект типа BaseResponseObject, представляющий результат запроса.
+     */
+    public static function getJson(string $url, array &$data){
+        try {
+            $json = self::get($url, $data);
+            return new BaseResponseObject($json, $url, 'get');
+        } catch (\Exception $ex){
+            return self::createErrorResponse('Ошибка при запросе: ' . $ex->getMessage(), $url, 'get');
+        }
     }
     /**
      * Возвращает новый объект ответа с ошибкой.

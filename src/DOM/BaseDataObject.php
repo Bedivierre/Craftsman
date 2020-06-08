@@ -224,27 +224,24 @@ class BaseDataObject implements \Iterator, \ArrayAccess
 
     // Реализация интерфейса ArrayAccess
     /**
-     * Whether a offset exists
+     * Проверка существования объекта по индексу.
      * @link https://php.net/manual/en/arrayaccess.offsetexists.php
      * @param mixed $offset <p>
-     * An offset to check for.
+     * Ключ, по которому осуществляется проверка существования объекта по индексу.
      * </p>
-     * @return bool true on success or false on failure.
-     * </p>
-     * <p>
-     * The return value will be casted to boolean if non-boolean was returned.
+     * @return bool
      */
     public function offsetExists($offset)
     {
         return isset($this->_data[$offset]);
     }
     /**
-     * Offset to retrieve
+     * Получение объекта о ключу. Идентично $obj[$offset].
      * @link https://php.net/manual/en/arrayaccess.offsetget.php
      * @param mixed $offset <p>
-     * The offset to retrieve.
+     * Ключ, по которому возвращается объект.
      * </p>
-     * @return mixed Can return all value types.
+     * @return mixed Возвращает null в случае отсутствия результата.
      */
     public function offsetGet($offset)
     {
@@ -253,13 +250,14 @@ class BaseDataObject implements \Iterator, \ArrayAccess
         return null;
     }
     /**
-     * Offset to set
+     * Устанавливает значение по ключу, аналогичен $obj[$offset] = $value. В отличие от стрелочного
+     * синтаксиса ($obj->{$offset}) не преобразует получаемые массивы в объекты BaseDataObject.
      * @link https://php.net/manual/en/arrayaccess.offsetset.php
      * @param mixed $offset <p>
-     * The offset to assign the value to.
+     * Ключ, по которому осуществляется присваивание.
      * </p>
      * @param mixed $value <p>
-     * The value to set.
+     * Устанавливаемое значение.
      * </p>
      * @return void
      */
@@ -271,10 +269,10 @@ class BaseDataObject implements \Iterator, \ArrayAccess
             $this->_data[$offset] = $value;
     }
     /**
-     * Offset to unset
+     * Удаляет значение по ключу. Идентичен unset($obj[$offset]).
      * @link https://php.net/manual/en/arrayaccess.offsetunset.php
      * @param mixed $offset <p>
-     * The offset to unset.
+     * Ключ удаляемой пары ключ-значение.
      * </p>
      * @return void
      */
@@ -327,8 +325,10 @@ class BaseDataObject implements \Iterator, \ArrayAccess
     }
 
     /**
-     * Возвращает этот объект в виде массива.
-     * @param bool $usePrivate Определяет, оставлять в результирующем массиве приватные свойства или нет.
+     * Возвращает этот объект в виде массива. Если вложенные объекты имеют функцию toArray(), в массив подставляется
+     * результат этой функции, иначе же используется преобразование в массив (array)$x. Если вложенный объект
+     * является экземпляром BaseDataObject, то в его функцию toArray() передаётся $includePrivate.
+     * @param bool $includePrivate Определяет, оставлять в результирующем массиве приватные свойства или нет.
      * Приватными свойствами считаются свойства, имя которых начинается со знака подчёркивания ("_")
      * @return array
      */
@@ -344,11 +344,21 @@ class BaseDataObject implements \Iterator, \ArrayAccess
                     else
                         $ret[$k] = (array) $v;
                 } else {
-                    $ret[$k] = $k;
+                    $ret[$k] = $v;
                 }
             }
         }, $includePrivate, $includePrivate);
         return $ret;
+    }
+
+    /**
+     * Возвращает этот объект в виде JSON-строки.
+     * @param bool $includePrivate Определяет, оставлять в результате приватные свойства или нет.
+     * Приватными свойствами считаются свойства, имя которых начинается со знака подчёркивания ("_")
+     * @return string
+     */
+    public function toJson($includePrivate = false){
+        return json_encode($this->toArray($includePrivate));
     }
 
     /**
