@@ -2,6 +2,8 @@
 
 
 namespace Bedivierre\Craftsman\Masonry;
+use Bedivierre\Craftsman\Utility;
+
 /**
  * Базовый элемент библиотеки для хранения и передачи данных.
  * Представляет собой объект с динамическими свойствами и интерфейсом счётчика, то есть к нему могут быть применены
@@ -201,6 +203,10 @@ class BaseDataObject implements \Iterator, \ArrayAccess
         }
     }
 
+    /**
+     * Добавляет "сырое" значение в массив, аналог синтаксиса обращения к массиву.
+     * @param mixed $value Добавляемое значение
+     */
     public function push($value) : void{
         $this[] = $value;
     }
@@ -217,6 +223,22 @@ class BaseDataObject implements \Iterator, \ArrayAccess
             return $data->toArray();
         return is_array($data) ? $data : json_decode($data, true);
     }
+
+    /**
+     * Получает данные по пути.
+     * @param string $path Путь, по которому ищется результат.
+     * @param bool $convertToObject Указывает, нужно ли конвертировать результат в BaseDataObject если это массив.
+     * @param string $delimeter Разделитель уровней в пути.
+     * @return array|mixed|null
+     */
+    public function getDataByPath(string $path, bool $convertToObject = false, string $delimeter = '.'){
+        $res = Utility::arr_path($this->_data, $path, $delimeter);
+        if($convertToObject && is_array($res))
+            return new BaseDataObject($res);
+        return $res;
+    }
+
+
 
 
     // Реализация интерфейса Iterator
