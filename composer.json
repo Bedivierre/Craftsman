@@ -26,6 +26,7 @@
             "Bedivierre\\Craftsman\\Appraise\\" : "src/DataAssert/",
             "Bedivierre\\Craftsman\\Poetry\\" : "src/String/",
             "Bedivierre\\Craftsman\\Aqueduct\\" : "src/DataTransport/",
+            "Bedivierre\\Craftsman\\Aqueduct\\Flow\\" : "src/DataTransport/Transport/",
             "Bedivierre\\Craftsman\\Aqueduct\\REST\\" : "src/DataTransport/REST/"
         }
     }

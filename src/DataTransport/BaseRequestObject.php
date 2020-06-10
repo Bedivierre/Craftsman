@@ -76,7 +76,7 @@ class BaseRequestObject extends BaseDataObject
      * в функцию запроса getMethodFunc.
      * @return BaseDataObject
      */
-    protected function getRequestData()
+    public function getRequestData()
     {
         return $this;
     }

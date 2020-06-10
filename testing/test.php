@@ -14,7 +14,7 @@ require_once "../vendor/autoload.php";
 
 $b = new BaseRequestObject('http://172.20.4.7/shopadmin/kassa_check.php4', 'get');
 $b->kassa_nomer=8;
-$b->check_nomer=1025608;
+$b->check_nomer=1026286;
 $ret = $b->get();
 
 echo Str::byte( $a = new Str("qw531qaaedqeda\n")) . "\n";
@@ -31,7 +31,20 @@ foreach ($a as $c){
 
 
 
-$items = []; // Массив с позициями чека
+$items = [
+    [
+        'code' => "111",
+        'name' => "Предмет 1",
+        'price' => 222222,
+        'mark' => 'fR55"233cs22-00sk',
+    ],
+    [
+        'code' => "111",
+        'name' => "Предмет 2",
+        'price' => 444,
+        'mark' => "fR55\"233'$5222-00sk",
+    ],
+]; // Массив с позициями чека
 
 $check_data = [
     'error_code' => 0,
@@ -55,7 +68,7 @@ foreach ($items as $i){
 }
 $json = json_encode($check_data); // результат, который надо скормить сайту. Эта функция сама
                                   // заэкранирует всё, что требуется.
-
+print_r($json);
 //=======================
 
 
