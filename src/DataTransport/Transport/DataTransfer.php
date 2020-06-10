@@ -27,13 +27,17 @@ class DataTransfer extends BaseDataObject
     /**
      * Функция трансфера, делающая запрос BaseRequestObject и получающая в ответ BaseResponseObject.
      * @param BaseRequestObject $request Объект запроса, обрабатываемый функцией трансфера
-     * @param BaseDataObject $data Дополнительный объект с настройками
+     * @param array|BaseDataObject $data Дополнительные параметры к запросу. Могут влиять на поведение протокола.
      * @return BaseResponseObject
      * @throws \Exception
      */
     public function doTransfer(BaseRequestObject $request, BaseDataObject $data) : BaseResponseObject{
-        $func = $this->getTransferFunc();
-        return $func($request, $data);
+        try {
+            $func = $this->getTransferFunc();
+            return $func($request, $data);
+        } catch (\Exception $ex){
+            return self::createErrorResponse($ex->getMessage(), $request->getHost(), $request->getTransferProtocolName());
+        }
     }
 
     /**
@@ -52,7 +56,7 @@ class DataTransfer extends BaseDataObject
     /**
      * Производит GET-запрос по указанному адресу с указанными параметрами.
      * @param BaseRequestObject $request Объект запроса.
-     * @param BaseDataObject $data Дополнительные данные.
+     * @param array|BaseDataObject $data Дополнительные параметры к запросу. Могут влиять на поведение протокола.
      * @return string|null Возвращает строку, представляющую результат запроса.
      * @throws \Exception
      */
@@ -82,7 +86,7 @@ class DataTransfer extends BaseDataObject
     /**
      * Производит POST-запрос по указанному адресу с указанными данными.
      * @param BaseRequestObject $request Объект запроса.
-     * @param BaseDataObject $data Дополнительные данные.
+     * @param array|BaseDataObject $data Дополнительные параметры к запросу. Могут влиять на поведение протокола.
      * @return string|null Возвращает строку, представляющую результат запроса.
      * @throws \Exception
      */

@@ -1,6 +1,9 @@
 <?php
 namespace Bedivierre\Craftsman\Aqueduct;
 
+use Bedivierre\Craftsman\Aqueduct\Flow\DataTransfer;
+use Bedivierre\Craftsman\Aqueduct\Flow\JsonGetDataTransfer;
+use Bedivierre\Craftsman\Aqueduct\Flow\JsonPostDataTransfer;
 use Bedivierre\Craftsman\Masonry\BaseDataObject;
 use Bedivierre\Craftsman\Utility;
 
@@ -16,10 +19,10 @@ class BaseRequestObject extends BaseDataObject
      * @param callable|null $func Функция, которая будет вызываться для метода. Если метод указан как get
      * или post, используется соответствующий транспортный канал.
      */
-    public function __construct(string $host, string $method = 'post', Callable $func = null)
+    public function __construct(string $host, string $method = 'post', DataTransfer $protocol = null)
     {
         parent::__construct();
-        $this->setMethod($method, $func);
+        $this->setTransferProtocol($method, $protocol);
         $this->_host = $host;
     }
 
@@ -35,40 +38,39 @@ class BaseRequestObject extends BaseDataObject
      * Возвращает название метода отправки запроса
      * @return string
      */
-    public function getMethodName(): string
+    public function getTransferProtocolName(): string
     {
-        return $this->_method->name;
+        return $this->_transfer->name;
     }
     /**
      * Возвращает функцию отправки запроса. Устанавливается она в setMethod.
      * @return Callable|null
      */
-    public function getMethodFunc(): Callable
+    public function getTransferProtocol(): DataTransfer
     {
-        return $this->_method->func;
+        return $this->_transfer->protocol;
     }
     /**
      * Указывает название и функцию отправки запроса. По умолчанию используется метод POST по адресу getHost()
      * @param string $method Имя для метода передачи.
-     * @param callable|null $func Функция, используемая при передаче данных. Если null, используется значение по
-     * умолчанию. В функцию будет передаваться результат функции getRequestData(массив) и сам объект запроса. Метод должен
-     * возвращать экземпляр BaseResponseObject
+     * @param DataTransfer $protocol Протокол передачи данных. Если имя метода равно get или post, а этот аргумент равен
+     * null, то берутся стандартные протоколы передачи через JSON.
      */
-    public function setMethod(string $method, Callable $func = null)
+    public function setTransferProtocol(string $method, DataTransfer $protocol = null)
     {
         $m = new BaseDataObject();
         if(mb_strtolower($method) == 'get') {
             $m->type = 'get';
-            $m->func = is_callable($func) ? $func : function(BaseDataObject $d, BaseRequestObject $r) {return $this->requestGet($d, $r);};
-        } else if($func == null || mb_strtolower($method) == 'post') {
+            $m->protocol = $protocol !== null ? $protocol : new JsonGetDataTransfer();
+        } else if($protocol == null || mb_strtolower($method) == 'post') {
             $m->type = 'post';
-            $m->func = is_callable($func) ? $func : function(BaseDataObject $d, BaseRequestObject $r) {return $this->requestPost($d, $r);};
+            $m->protocol = $protocol !== null ? $protocol : new JsonPostDataTransfer();
         } else {
             $m->type = $method;
-            $m->func = $func;
+            $m->protocol = $protocol;
         }
 
-        $this->_method = $m;
+        $this->_transfer = $m;
     }
 
     /**
@@ -84,36 +86,45 @@ class BaseRequestObject extends BaseDataObject
      * Делает запрос с помощью указанной в getMethodFunc функции.
      * @return BaseResponseObject
      */
-    public function doRequest(){
-        if(is_callable($cb = $this->getMethodFunc())) {
-            $ret = $cb($this->getRequestData(), $this);
-            return $ret;
-        }
-        return Utility::createErrorResponse("Не указана функция отправки данных", $this->getHost());
+    public function doRequest($data = []){
+        return $this->runCustomTransferProtocol($this->getTransferProtocol(), $data);
     }
 
     /**
-     * Делает POST-запрос (ожидая JSON-строку в ответ) по хосту getHost() и возвращает объект BaseResponseObject.
+     * @param DataTransfer $protocol Протокол передачи данных
+     * @param array|BaseDataObject $data Дополнительные параметры к запросу. Могут влиять на поведение протокола.
      * @return BaseResponseObject
      */
-    public function post(){
-        return $this->requestPost($this->getRequestData(), $this);
+    public function runCustomTransferProtocol(DataTransfer $protocol, $data = []):BaseResponseObject{
+        try{
+            if (is_array($data))
+                $data = new BaseDataObject($data);
+            if(!($data instanceof BaseDataObject))
+                $data = new BaseDataObject();
+
+            $ret = $protocol->doTransfer($this, $data);
+            return $ret;
+        }catch(\Exception $ex){
+            return Utility::createErrorResponse(
+                "Ошибка при транспортировке данных: ". $ex->getMessage(),
+                $this->getHost(),
+                '');
+        }
+    }
+    /**
+     * Делает POST-запрос (ожидая JSON-строку в ответ) по хосту getHost() и возвращает объект BaseResponseObject.
+     * @param array|BaseDataObject $data Дополнительные параметры к запросу. Могут влиять на поведение протокола.
+     * @return BaseResponseObject
+     */
+    public function post($data = []):BaseResponseObject{
+        return $this->runCustomTransferProtocol(new JsonPostDataTransfer(), $data);
     }
     /**
      * Делает GET-запрос (ожидая JSON-строку в ответ) по хосту getHost() и возвращает объект BaseResponseObject.
+     * @param array|BaseDataObject $data Дополнительные параметры к запросу. Могут влиять на поведение протокола.
      * @return BaseResponseObject
      */
-    public function get(){
-        return $this->requestGet($this->getRequestData(), $this);
-    }
-    private function requestPost(BaseDataObject $data, BaseRequestObject $request) : BaseResponseObject {
-        $arr = $data->toArray();
-        $ret = Utility::postJson($this->getHost(), $arr);
-        return $ret;
-    }
-    private function requestGet(BaseDataObject $data, BaseRequestObject $request) : BaseResponseObject {
-        $arr = $data->toArray();
-        $ret = Utility::getJson($this->getHost(), $arr);
-        return $ret;
+    public function get($data = []):BaseResponseObject{
+        return $this->runCustomTransferProtocol(new JsonGetDataTransfer(), $data);
     }
 }

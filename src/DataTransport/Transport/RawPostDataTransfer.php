@@ -7,7 +7,7 @@ use Bedivierre\Craftsman\Aqueduct\BaseResponseObject;
 
 use Bedivierre\Craftsman\Masonry\BaseDataObject;
 
-class RawPostDataTransfer extends \Bedivierre\Craftsman\Aqueduct\DataTransfer
+class RawPostDataTransfer extends \Bedivierre\Craftsman\Aqueduct\Flow\DataTransfer
 {
     public function __construct()
     {
@@ -19,7 +19,7 @@ class RawPostDataTransfer extends \Bedivierre\Craftsman\Aqueduct\DataTransfer
     /**
      * Производит GET-запрос, ожидая получить JSON-строку, по указанному адресу с указанными данными.
      * @param BaseRequestObject $request Объект запроса
-     * @param BaseDataObject $data Массив данных-параметров запроса.
+     * @param array|BaseDataObject $data Дополнительные параметры к запросу. Могут влиять на поведение протокола.
      * @return BaseResponseObject|null Возвращает объект типа BaseResponseObject, представляющий результат запроса.
      */
     function postRaw(BaseRequestObject $request, BaseDataObject $data){
