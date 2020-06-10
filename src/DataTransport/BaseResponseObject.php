@@ -14,16 +14,19 @@ class BaseResponseObject extends BaseDataObject
     const ERR_UNKNOWN = -1;
 
     /**
-     * @param string|array $data Тело ответа, как правило, строка JSON
+     * @param string|array|object $data Тело ответа, как правило, строка JSON
      * @param string $url URL, по которому был совершен запрос.
-     * @param string $method Метод запроса (POST или GET)
+     * @param string $method Метод запроса (post, get или имя своего транспортного канала)
+     * @param bool $storeRawData Указывает, надо ли сохранять в объекте ответа входные данные в чистом виде.
      */
-    public function __construct($data, string $url = '', string $method = 'post')
+    public function __construct($data, string $url = '', string $method = 'post', bool $storeRawData = false)
     {
         $this->_url = $url;
         $this->_method = $method;
         $this->_errorMessage = '';
         $this->_errorCode = 0;
+        if($storeRawData)
+            $this->_raw = is_object($data) ? clone $data : $data;
         parent::__construct($data);
     }
 
@@ -36,12 +39,21 @@ class BaseResponseObject extends BaseDataObject
         return $this->_method;
     }
     /**
-     * URL запроса, от кторого получен данный ответ.
+     * URL запроса, от которого получен данный ответ.
      * @return string
      */
     public function getUrl(): string
     {
         return $this->_url;
+    }
+    /**
+     * Возвращает входные данные, переданные объекту при создании, если они сохранялись ("$storeRawData = true" в
+     * конструкторе)
+     * @return mixed|null
+     */
+    public function getRaw()
+    {
+        return $this->_raw;
     }
 
     /**

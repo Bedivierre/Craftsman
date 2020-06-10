@@ -15,7 +15,7 @@ use Bedivierre\Craftsman\Utility;
  * способ получить доступ по индексу типа int. Синтаксис массива не имеет доступа к приватным свойствам.
  * @package Bedivierre\Craftsman\Masonry
  */
-class BaseDataObject implements \Iterator, \ArrayAccess
+class BaseDataObject implements \Iterator, \ArrayAccess, \JsonSerializable
 {
 
     /**
@@ -240,6 +240,14 @@ class BaseDataObject implements \Iterator, \ArrayAccess
 
 
 
+    /**
+     * Реализация интерфейса JsonSerializable
+     * @return mixed
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
 
     // Реализация интерфейса Iterator
     function rewind() {
@@ -459,6 +467,7 @@ class BaseDataObject implements \Iterator, \ArrayAccess
         }
         return $this;
     }
+
 
 
 }
