@@ -3,7 +3,7 @@
     "description": "Comprehensive class library",
     "type": "library",
     "license": "MIT",
-    "version": "0.2-dev",
+    "version": "0.3-dev",
     "authors": [
         {
             "name": "Bedivierre",
@@ -27,7 +27,7 @@
             "Bedivierre\\Craftsman\\Poetry\\" : "src/String/",
             "Bedivierre\\Craftsman\\Aqueduct\\" : "src/DataTransport/",
             "Bedivierre\\Craftsman\\Aqueduct\\Flow\\" : "src/DataTransport/Transport/",
-            "Bedivierre\\Craftsman\\Aqueduct\\REST\\" : "src/DataTransport/REST/"
+            "Bedivierre\\Craftsman\\Cartography\\" : "src/Routing/"
         }
     }
 }
