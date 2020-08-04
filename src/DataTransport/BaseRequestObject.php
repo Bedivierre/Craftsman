@@ -25,6 +25,7 @@ class BaseRequestObject extends BaseDataObject
         $this->setTransferProtocol($method, $protocol);
         $this->_host = $host;
         $this->_headers = new BaseDataObject();
+        $this->_auth = null;
     }
 
     /**
@@ -73,9 +74,41 @@ class BaseRequestObject extends BaseDataObject
         $this->_transfer = $m;
     }
 
+    /**
+     * Устанавливает параметры аутентификации для запроса
+     * @param string $userName Имя пользователя для запроса
+     * @param string $password Пароль пользователя
+     * @param int $authType Тип аутентификации. Используются переменные категории CURLAUTH_*
+     */
+    public function setAuth(string $userName, string $password, int $authType = CURLAUTH_BASIC){
+        $this->_auth = new BaseDataObject([
+            'userName' => $userName,
+            'password' => $password,
+            'type' => $authType,
+        ]);
+    }
+
+    /**
+     * Возвращает данные аутентификации, указанные ранее в объекте
+     * @return BaseDataObject|null
+     */
+    public function getAuth(){
+        return $this->_auth;
+    }
+
+    /**
+     * Добавляет http-заголовок к запросу.
+     * @param string $name Имя заголовка, регистрозависимо.
+     * @param string $value Значение заголовка.
+     */
     public function setHeader(string $name, string $value){
         $this->_headers->{$name} = $value;
     }
+
+    /**
+     * Возвращает все ранее установленные заголовки для запроса
+     * @return BaseDataObject
+     */
     public function getHeaders() : BaseDataObject{
         return $this->_headers;
     }

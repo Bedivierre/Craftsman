@@ -13,8 +13,9 @@ use Bedivierre\Craftsman\Utility;
 require_once "../vendor/autoload.php";
 
 $r = new BaseRequestObject('https://b2b-test2.alfastrah.ru/wapi/dictionary/address-type/names');
+$r->setAuth('TORGSTAIL', 'b4PQs6aS', CURLAUTH_DIGEST);
 
-$response = $r->post();
+$response = $r->get();
 
 echo $response->getHttpCode();
 //print_r($request->toArray());

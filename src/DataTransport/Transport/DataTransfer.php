@@ -29,6 +29,13 @@ class DataTransfer extends BaseDataObject
         return $h;
     }
 
+    static function setAuth(BaseRequestObject $request, $ch){
+        if(!($auth = $request->getAuth()))
+            return;
+        curl_setopt($ch, CURLOPT_HTTPAUTH,  $auth->type);
+        curl_setopt($ch, CURLOPT_USERPWD,  "{$auth->userName}:{$auth->password}");
+    }
+
     /**
      * @param $ch
      * @return BaseDataObject
@@ -122,6 +129,7 @@ class DataTransfer extends BaseDataObject
             CURLOPT_HTTPHEADER => $headers,
         );
         curl_setopt_array($ch, $defaults);
+        self::setAuth($request, $ch);
 
         return self::processResult($ch);
     }
@@ -147,6 +155,7 @@ class DataTransfer extends BaseDataObject
             CURLOPT_HTTPHEADER => $headers,
         );
         curl_setopt_array($ch, $defaults);
+        self::setAuth($request, $ch);
 
         return self::processResult($ch);
     }
