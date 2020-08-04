@@ -47,7 +47,7 @@ class BaseResponseObject extends BaseDataObject
      * Получить все заголовки ответа
      * @return BaseDataObject
      */
-    public function getAllHeaders(string $name){
+    public function getAllHeaders(){
         return $this->_headers;
     }
     /**
