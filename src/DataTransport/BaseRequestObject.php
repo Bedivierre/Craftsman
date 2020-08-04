@@ -24,6 +24,7 @@ class BaseRequestObject extends BaseDataObject
         parent::__construct();
         $this->setTransferProtocol($method, $protocol);
         $this->_host = $host;
+        $this->_headers = new BaseDataObject();
     }
 
     /**
@@ -69,8 +70,14 @@ class BaseRequestObject extends BaseDataObject
             $m->type = $method;
             $m->protocol = $protocol;
         }
-
         $this->_transfer = $m;
+    }
+
+    public function setHeader(string $name, string $value){
+        $this->_headers->{$name} = $value;
+    }
+    public function getHeaders() : BaseDataObject{
+        return $this->_headers;
     }
 
     /**

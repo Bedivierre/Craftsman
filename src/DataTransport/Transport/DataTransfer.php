@@ -114,10 +114,12 @@ class DataTransfer extends BaseDataObject
         $query = http_build_query($request->getRequestData()->toArray());
         $ch = curl_init();
         $uri = $url."?".$query;
+        $headers = $request->getHeaders()->toArray();
         $defaults = array(
             CURLOPT_URL => $uri,
             CURLOPT_HEADER => 1,
             CURLOPT_RETURNTRANSFER=>true,
+            CURLOPT_HTTPHEADER => $headers,
         );
         curl_setopt_array($ch, $defaults);
 
@@ -135,12 +137,14 @@ class DataTransfer extends BaseDataObject
         $url = $request->getHost();
         $query = http_build_query($request->getRequestData()->toArray());
         $ch = curl_init();
+        $headers = $request->getHeaders()->toArray();
         $defaults = array(
             CURLOPT_URL => $url,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $query,
             CURLOPT_HEADER => 1,
             CURLOPT_RETURNTRANSFER=>true,
+            CURLOPT_HTTPHEADER => $headers,
         );
         curl_setopt_array($ch, $defaults);
 
