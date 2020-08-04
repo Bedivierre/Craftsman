@@ -10,6 +10,55 @@ use Bedivierre\Craftsman\Masonry\BaseDataObject;
 
 class DataTransfer extends BaseDataObject
 {
+    /**
+     * @param string $headers
+     * @return BaseDataObject
+     */
+    static function parseHeaders(string $headers) : BaseDataObject{
+        $h = new BaseDataObject();
+        $headers_arr = explode("\r\n", $headers);
+        $headers_arr = array_filter($headers_arr);
+        foreach ($headers_arr as $header){
+            $m = [];
+            if(preg_match('/^\s*([\w_-]+)\s*:\s*(.*)\s*$/', $header,$m)){
+                $name = $m[1];
+                $content = $m[2];
+                $h->{strtolower($name)} = $content;
+            }
+        }
+        return $h;
+    }
+
+    /**
+     * @param $ch
+     * @return BaseDataObject
+     * @throws \Exception
+     */
+    static function processResult($ch) : BaseDataObject{
+        $result = curl_exec($ch);
+
+        if(curl_error($ch))
+        {
+            curl_close($ch);
+            throw new \Exception('Ошибка при запросе: ' . curl_error($ch));
+        }
+
+        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $header_text = substr($result, 0, $header_size);
+        $headers = self::parseHeaders($header_text);
+        $body = substr($result, $header_size);
+        $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        $return = new BaseDataObject([
+            'headers'=>$headers,
+            'body'=>$body,
+            'code'=>$code
+        ]);
+
+        curl_close($ch);
+        return $return;
+    }
+
+
     public function __construct(string $name, Callable $func)
     {
         if($func === null)
@@ -57,7 +106,7 @@ class DataTransfer extends BaseDataObject
      * Производит GET-запрос по указанному адресу с указанными параметрами.
      * @param BaseRequestObject $request Объект запроса.
      * @param array|BaseDataObject $data Дополнительные параметры к запросу. Могут влиять на поведение протокола.
-     * @return string|null Возвращает строку, представляющую результат запроса.
+     * @return BaseDataObject Возвращает объект, представляющий результат запроса.
      * @throws \Exception
      */
     public static function get(BaseRequestObject $request, BaseDataObject $data){
@@ -67,27 +116,19 @@ class DataTransfer extends BaseDataObject
         $uri = $url."?".$query;
         $defaults = array(
             CURLOPT_URL => $uri,
-            CURLOPT_HEADER => 0,
+            CURLOPT_HEADER => 1,
             CURLOPT_RETURNTRANSFER=>true,
         );
         curl_setopt_array($ch, $defaults);
 
-        $result = curl_exec($ch);
-
-        if(curl_error($ch))
-        {
-            curl_close($ch);
-            throw new \Exception('Ошибка при запросе: ' . curl_error($ch));
-        }
-        curl_close($ch);
-        return $result;
+        return self::processResult($ch);
     }
 
     /**
      * Производит POST-запрос по указанному адресу с указанными данными.
      * @param BaseRequestObject $request Объект запроса.
      * @param array|BaseDataObject $data Дополнительные параметры к запросу. Могут влиять на поведение протокола.
-     * @return string|null Возвращает строку, представляющую результат запроса.
+     * @return BaseDataObject Возвращает объект, представляющий результат запроса.
      * @throws \Exception
      */
     public static function post(BaseRequestObject $request, BaseDataObject $data){
@@ -98,19 +139,11 @@ class DataTransfer extends BaseDataObject
             CURLOPT_URL => $url,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $query,
-            CURLOPT_HEADER => 0,
+            CURLOPT_HEADER => 1,
             CURLOPT_RETURNTRANSFER=>true,
         );
         curl_setopt_array($ch, $defaults);
 
-        $result = curl_exec($ch);
-
-        if(curl_error($ch))
-        {
-            curl_close($ch);
-            throw new \Exception('Ошибка при запросе: ' . curl_error($ch));
-        }
-        curl_close($ch);
-        return $result;
+        return self::processResult($ch);
     }
 }

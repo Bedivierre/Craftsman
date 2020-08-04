@@ -12,13 +12,11 @@ use Bedivierre\Craftsman\Utility;
 
 require_once "../vendor/autoload.php";
 
-$router = new Router();
-$router->run();
-$request = $router->getRequest();
+$r = new BaseRequestObject('https://b2b-test2.alfastrah.ru/wapi/dictionary/address-type/names');
 
-echo $request->getQuery();
+$response = $r->post();
 
-
+echo $response->getHttpCode();
 //print_r($request->toArray());
 
 
