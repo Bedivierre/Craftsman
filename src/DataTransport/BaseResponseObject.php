@@ -14,13 +14,13 @@ class BaseResponseObject extends BaseDataObject
     const ERR_UNKNOWN = -1;
 
     /**
-     * @param BaseDataObject $data Тело ответа, как правило, строка JSON
+     * @param BaseDataObject|array|string $data Тело ответа, как правило, строка JSON
      * @param string $url URL, по которому был совершен запрос.
      * @param string $method Метод запроса (post, get или имя своего транспортного канала)
      * @param bool $storeRawData Указывает, надо ли сохранять в объекте ответа входные данные в чистом виде.
      * @param int $httpCode Http-код ответа.
      */
-    public function __construct(BaseDataObject $data, string $url = '', string $method = 'post', bool $storeRawData = false)
+    public function __construct($data, string $url = '', string $method = 'post', bool $storeRawData = false)
     {
         $this->_url = $url;
         $this->_method = $method;
