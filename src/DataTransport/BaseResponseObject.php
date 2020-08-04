@@ -20,7 +20,7 @@ class BaseResponseObject extends BaseDataObject
      * @param bool $storeRawData Указывает, надо ли сохранять в объекте ответа входные данные в чистом виде.
      * @param int $httpCode Http-код ответа.
      */
-    public function __construct($data, string $url = '', string $method = 'post', bool $storeRawData = false)
+    public function __construct(BaseDataObject $data, string $url = '', string $method = 'post', bool $storeRawData = false)
     {
         $this->_url = $url;
         $this->_method = $method;
