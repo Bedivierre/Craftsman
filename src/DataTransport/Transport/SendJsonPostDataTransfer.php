@@ -27,6 +27,7 @@ class SendJsonPostDataTransfer extends \Bedivierre\Craftsman\Aqueduct\Flow\DataT
      */
     function send(BaseRequestObject $request, BaseDataObject $data){
         try {
+            $request->setHeader("Content-Type", "application/json;charset=UTF-8");
             $json = self::post($request, $request->getRequestData()->toJson(), $data);
             return new BaseResponseObject($json, $request->getHost(), 'post',(bool) $data->save_raw);
         } catch (\Exception $ex){
