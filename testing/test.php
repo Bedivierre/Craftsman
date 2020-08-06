@@ -12,15 +12,15 @@ require_once "../vendor/autoload.php";
 
 $to = new BaseDataObject();
 $to->addRequirement('name', 'string');
-$to->addRequirement('code', ['pattern'=>'[0-9a-fA-F]{3,6}']);
+$to->addRequirement('code', ['pattern'=>'[0-9a-fA-F]{3,6}'], false);
+$to->addRequirement('code2', ['min'=>-5, 'max'=>5], false);
 $to->addRequirement('code1', function($v){
     if($v == '123' || $v == '456' || $v == 789)
         return true;
     return false;
 });
 $to->name = 0;
-$to->code = 'adefff';
-$to->code1 = 1234;
+$to->code1 = 123;
 $chres = $to->checkRequirements();
 exit();
 

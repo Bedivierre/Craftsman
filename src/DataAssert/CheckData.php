@@ -44,11 +44,12 @@ class CheckData{
     }
 
     public function checkData($v){
-        if(is_null($v)
-                || (is_array($v) && empty($v))
-                || (is_string($v) && empty($v))){
+        if(is_null($v)){
             if ($this->required)
                 return 'Пустое значение';
+            if(is_callable($this->check))
+                return call_user_func($this->check, $v);
+            return true;
         }
 
         if($this->type){
@@ -85,12 +86,12 @@ class CheckData{
         }
         if((is_int($v) || is_float($v)) && $this->max !== null){
             if($v > $this->max) {
-                return "Значение больше максимально допустимого: ";
+                return "Значение '{$v}' больше максимально допустимого '{$this->max}'";
             }
         }
         if((is_int($v) || is_float($v)) && $this->min !== null){
             if($v < $this->min) {
-                return "Значение меньше минимально допустимого";
+                return "Значение '{$v}' меньше минимально допустимого '{$this->min}'";
             }
         }
         if(is_callable($this->check))
@@ -124,11 +125,11 @@ class CheckData{
             if(isset($v['type']) && is_string($v['type']))
                 $ch->type = $v['type'];
             if(isset($v['min']))
-                $ch->type = $v['min'];
+                $ch->min = $v['min'];
             if(isset($v['max']))
-                $ch->type = $v['max'];
+                $ch->max = $v['max'];
             if(isset($v['check']) && is_callable($v['check']))
-                $ch->type = $v['max'];
+                $ch->check = $v['max'];
             return $ch;
         }
         return new CheckData(false);
