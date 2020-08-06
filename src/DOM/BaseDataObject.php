@@ -2,6 +2,8 @@
 
 
 namespace Bedivierre\Craftsman\Masonry;
+use Bedivierre\Craftsman\Appraise\CheckData;
+use Bedivierre\Craftsman\Appraise\CheckResult;
 use Bedivierre\Craftsman\Utility;
 
 /**
@@ -170,7 +172,57 @@ class BaseDataObject implements \Iterator, \ArrayAccess, \JsonSerializable
         return count($this->_private_data);
     }
 
+    /**
+     * Проверяет требования объекта
+     * @return CheckResult
+     */
+    public function checkRequirements(){
+        $r = $this->_requirements;
 
+        if(!($r instanceof BaseDataObject)) {
+            //проверка не проводится, следовательно, объект по умолчанию валидный
+            return new CheckResult(true);
+        }
+        $result = new CheckResult(true);
+        foreach ($r as $k => $v){
+            //преобразования в checkData
+            $ch = CheckData::transformToCheckData($v);
+            $check_result = $ch->checkData($this->{$k});
+            if($check_result !== true){
+                $result->result = false;
+                $result->data->{$k} = $check_result;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Добавляет требования для проверки объекту.
+     * Добавляет поле _requirements - массив значений. Ключ должен соответствовать имени свойства объекта. Значение
+     * $params может принимать
+     * следующие варианты:
+     *      bool - простая проверка на существующее и непустое поле.
+     *      string - тип проверяемого свойства
+     *      Callable - функция проверки свойства
+     *      CheckData|array
+     *          'required' => bool - проверка на необходимость существования свойства,
+     *          'type'=>string, - тип свойства
+     *          'pattern'=>string, шаблон для проверки строки
+     *          'min'=>float|int, 'max'=>float|int, - максимальные и минимальные значения для int и float
+     *          'check' => Callable - функция, вызываемая при проверке свойства. Вызывается после всех остальных
+     *              проверок.
+     * @param string $key Проверяемое свойство объекта
+     * @param bool|string|array|CheckData|Callable $params параметры проверки объекта
+     * @param bool|null $required - указывает, необхоимо ли наличие свойства. Если не null переопределяет значение из
+     *      $params или значение по умолчанию (true)
+     */
+    public function addRequirement(string $key, $params = true, bool $required = null){
+        if(!$this->_requirements)
+            $this->_requirements = new BaseDataObject();
+        $this->_requirements->{$key} = CheckData::transformToCheckData($params);
+        if(!is_null($required))
+            $this->_requirements->{$key}->required = $required;
+    }
 
 
     /**
