@@ -233,6 +233,11 @@ class BaseDataObject implements \Iterator, \ArrayAccess, \JsonSerializable
     public function __construct($data = [])
     {
         $this->apply_data($data);
+        $this->onInitialize();
+    }
+
+    public function onInitialize(){
+
     }
 
     /**
