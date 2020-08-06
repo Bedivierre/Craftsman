@@ -11,6 +11,19 @@ use Bedivierre\Craftsman\Utility;
 require_once "../vendor/autoload.php";
 
 
+$r = new BaseDataObject();
+$r->addRequirement('c', 'bdo');
+$c = new BaseDataObject();
+$c->addRequirement('text', ['pattern'=>'\w+']);
+$c->addRequirement('value', 'int');
+$c->addRequirement('value2', 'float', false);
+$r->c = $c;
+
+$ch = $r->checkRequirements();
+exit();
+
+
+
 $r = new BaseRequestObject('https://b2b.alfastrah.ru/wapi/dictionary/address-type/names');
 //$r = new BaseRequestObject('https://b2b-test2.alfastrah.ru/wapi/dictionary/address-type/names');
 

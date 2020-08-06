@@ -31,6 +31,7 @@ class CheckData{
     const TYPE_FLOAT = 'float';
     const TYPE_ARRAY = 'array';
     const TYPE_OBJECT = 'object';
+    const TYPE_DATA_OBJECT = 'bdo';
 
     public function __construct(bool $required = true, string $type = '', string $pattern = '')
     {
@@ -71,6 +72,13 @@ class CheckData{
                     break;
                 case self::TYPE_OBJECT:
                     if(!is_object($v)) return "Значение не является объектом";
+                    break;
+                case self::TYPE_DATA_OBJECT:
+                    if(!($v instanceof BaseDataObject)) return "Значение не является объектом данных";
+                    $ch = $v->checkRequirements();
+                    if(!$ch->result)
+                        return "Не пройдена проверка объекта данных, " . $ch->data->count() . " ошибок. Ошибочные поля: "
+                            . join(', ', $ch->data->keys()->toArray());
                     break;
                 default:
                     if(gettype($v) !== $this->type) return "Значение не является типом {$this->type}";
