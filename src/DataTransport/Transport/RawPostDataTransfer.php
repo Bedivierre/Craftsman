@@ -24,7 +24,7 @@ class RawPostDataTransfer extends \Bedivierre\Craftsman\Aqueduct\Flow\DataTransf
      */
     function postRaw(BaseRequestObject $request, BaseDataObject $data){
         try {
-            $return = self::post($request, $data);
+            $return = self::post($request, http_build_query($request->getRequestData()->toArray()), $data);
             return new BaseResponseObject($return, $request->getHost(), 'post', true);
         } catch (\Exception $ex){
             return self::createErrorResponse('Ошибка при запросе: ' . $ex->getMessage(), $request->getHost(), 'post');

@@ -114,6 +114,19 @@ class BaseRequestObject extends BaseDataObject
     }
 
     /**
+     * Возвращает форматированный массив заголовков.
+     * @return array
+     */
+    public function getHeadersArray() : array{
+        $h = $this->_headers;
+        $arr = [];
+        foreach ($h as $k =>$v){
+            $arr[] = "{$k}: {$v}";
+        }
+        return $arr;
+    }
+
+    /**
      * Возвращает структурированные данные для запроса в виде массива. Эти данные будут отправляться в
      * в функцию запроса getMethodFunc.
      * @return BaseDataObject

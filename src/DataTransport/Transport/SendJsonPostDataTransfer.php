@@ -8,7 +8,7 @@ use Bedivierre\Craftsman\Aqueduct\BaseResponseObject;
 
 use Bedivierre\Craftsman\Masonry\BaseDataObject;
 
-class JsonPostDataTransfer extends \Bedivierre\Craftsman\Aqueduct\Flow\DataTransfer
+class SendJsonPostDataTransfer extends \Bedivierre\Craftsman\Aqueduct\Flow\DataTransfer
 {
     public function __construct()
     {
@@ -27,7 +27,7 @@ class JsonPostDataTransfer extends \Bedivierre\Craftsman\Aqueduct\Flow\DataTrans
      */
     function send(BaseRequestObject $request, BaseDataObject $data){
         try {
-            $json = self::post($request, http_build_query($request->getRequestData()->toArray()), $data);
+            $json = self::post($request, $request->getRequestData()->toJson(), $data);
             return new BaseResponseObject($json, $request->getHost(), 'post',(bool) $data->save_raw);
         } catch (\Exception $ex){
             return self::createErrorResponse('Ошибка при запросе: ' . $ex->getMessage(), $request->getHost(), 'get');

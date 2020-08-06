@@ -141,15 +141,15 @@ class DataTransfer extends BaseDataObject
      * @return BaseDataObject Возвращает объект, представляющий результат запроса.
      * @throws \Exception
      */
-    public static function post(BaseRequestObject $request, BaseDataObject $data){
+    public static function post(BaseRequestObject $request, string $body, BaseDataObject $data){
         $url = $request->getHost();
-        $query = http_build_query($request->getRequestData()->toArray());
         $ch = curl_init();
-        $headers = $request->getHeaders()->toArray();
+        $request->setHeader('Content-Length', strlen($body));
+        $headers = $request->getHeadersArray();
         $defaults = array(
             CURLOPT_URL => $url,
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $query,
+            CURLOPT_POSTFIELDS => $body,
             CURLOPT_HEADER => 1,
             CURLOPT_RETURNTRANSFER=>true,
             CURLOPT_HTTPHEADER => $headers,
