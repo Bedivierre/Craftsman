@@ -460,7 +460,8 @@ class BaseDataObject implements \Iterator, \ArrayAccess, \JsonSerializable
      * @return string
      */
     public function toJson($includePrivate = false){
-        return json_encode($this->toArray($includePrivate));
+        $val = json_encode($this->toArray($includePrivate));
+        return $val == '[]' ? "{}" : $val;
     }
 
     /**
