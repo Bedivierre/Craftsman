@@ -188,7 +188,12 @@ class BaseDataObject implements \Iterator, \ArrayAccess, \JsonSerializable
             //преобразования в checkData
             $ch = CheckData::transformToCheckData($v);
             $check_result = $ch->checkData($this->{$k});
-            if($check_result !== true){
+            if($check_result instanceof CheckResult){
+                if(!$check_result->result){
+                    $result->result = false;
+                    $result->data->{$k} = $check_result;
+                }
+            }else if($check_result !== true){
                 $result->result = false;
                 $result->data->{$k} = $check_result;
             }
