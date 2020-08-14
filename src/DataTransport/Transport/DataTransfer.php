@@ -120,7 +120,7 @@ class DataTransfer extends BaseDataObject
         $url = $request->getHost();
         $query = http_build_query($request->getRequestData()->toArray());
         $ch = curl_init();
-        $uri = $url."?".$query;
+        $uri = $url. ($query ? "?".$query : '');
         $headers = $request->getHeaders()->toArray();
         $defaults = array(
             CURLOPT_URL => $uri,
