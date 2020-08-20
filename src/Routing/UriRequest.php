@@ -78,9 +78,9 @@ class UriRequest
         self::addMutator('i', function ($v){return (int) $v;});
         self::addMutator('f', function ($v){return (float) $v;});
         self::addMutator('b', function ($v){
-            if($v && (float)$v != 0 && strtolower($v) != 'false')
-                return true;
-            return false;
+            if(!$v || strtolower($v) == 'false')
+                return false;
+            return true;
         });
         self::addMutator('s', function ($v) {
             if(is_string($v))
@@ -115,7 +115,7 @@ class UriRequest
     static function callMutator($type, $value){
         if(!is_callable(self::$mutators->{$type}))
             return $value;
-        return self::$mutators->{$type}($value);
+        return call_user_func(self::$mutators->{$type}, $value);
     }
 
     /**

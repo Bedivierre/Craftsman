@@ -10,16 +10,15 @@ use Bedivierre\Craftsman\Utility;
 
 require_once "../vendor/autoload.php";
 
-
-$r = new BaseDataObject();
-$r->addRequirement('c', 'bdo');
-$c = new BaseDataObject();
-$c->addRequirement('text', ['pattern'=>'\w+']);
-$c->addRequirement('value', 'int');
-$c->addRequirement('value2', 'float', false);
-$r->c = $c;
-
-$ch = $r->checkRequirements();
+$r = new Router();
+$r->get('/testing/test.php', function () use($r){
+    $req = $r->getRequest();
+    echo $req->get('s', 'i', 10);
+});
+$req = new \Bedivierre\Craftsman\Cartography\UriRequest($r);
+$val = $req->get('s', 'bdo', '{"a":22, "b":"qwerty"}');
+echo $val;
+$r->run();
 exit();
 
 
