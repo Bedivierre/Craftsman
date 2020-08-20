@@ -39,11 +39,16 @@ class UriRequest
      */
     private $fullPathArray;
 
+    /** @var BaseDataObject $mutators */
+    private static $mutators;
+
     public function __construct(Router $router)
     {
         $this->router = $router;
         $this->basePath = $router->getBasePath();
         $this->method = $router->getRequestMethod();
+
+        self::preset_mutators();
 
         $uri = substr(rawurldecode($_SERVER['REQUEST_URI']), strlen($router->getBasePath()));
         $fullUri = rawurldecode($_SERVER['REQUEST_URI']);
@@ -69,7 +74,48 @@ class UriRequest
         $this->fullPathArray = new BaseDataObject(explode('/', trim($fullUri, '/')));
 
     }
+    static function preset_mutators(){
+        self::addMutator('i', function ($v){return (int) $v;});
+        self::addMutator('f', function ($v){return (float) $v;});
+        self::addMutator('b', function ($v){
+            if($v && (float)$v != 0 && strtolower($v) != 'false')
+                return true;
+            return false;
+        });
+        self::addMutator('s', function ($v) {
+            if(is_string($v))
+                return $v;
+            if(is_object($v) && method_exists($v, 'toString'))
+                return $v->toString();
+            try{
+                $ret = strval($v);
+            } catch (\Exception $ex){
+                $ret = '';
+            }
+            return $ret;
+        });
+        self::addMutator('j', function ($v){return ($ret = json_decode($v)) ? $ret : $v;});
+        self::addMutator('jo', function ($v){return ($ret = json_decode($v)) ? $ret : $v;});
+        self::addMutator('ja', function ($v){return ($ret = json_decode($v, true)) ? $ret : $v;});
+        self::addMutator('bdo', function ($v){return new BaseDataObject($v);});
+    }
 
+    /**
+     * @param string $type текстовый идентификатор для мутатора. Используется в $this->get($key, $type)
+     * @param $func Функция-мутатор. Должна принимать значение get или post параметра и возвращать измененное значение
+     */
+    public static function addMutator(string $type, $func){
+        if(!is_callable($func) && !is_string($func))
+            return;
+        if(!self::$mutators)
+            self::$mutators = new BaseDataObject();
+        self::$mutators->{$type} = $func;
+    }
+    static function callMutator($type, $value){
+        if(!is_callable(self::$mutators->{$type}))
+            return $value;
+        return self::$mutators->{$type}($value);
+    }
 
     /**
      * Define the current relative URI.
@@ -98,43 +144,31 @@ class UriRequest
 
     /**
      * @param string $key
-     * @param string $type s - string, i - int, f - float, b - bool
+     * @param string $type s - string, i - int, f - float, b - bool, j или jo - json_decode($val),
+     *          ja - json_decode($val, true), bdo - BaseDataObject($val)
+     * @param null|mixed $default
      * @return string|int|float|bool
      */
-    public function get(string $key, string $type = 's'){
-        $res = $this->getParams->{$key};
-        switch ($type){
-            case 'i':
-                return (int)$res;
-            case 'f':
-                return (float)$res;
-            case 'b':
-                if($res && (float)$res != 0 && strtolower($res) != 'false')
-                    return true;
-                return false;
-            case 's':
-            default:
-                return $res ? $res : '';
-        }
+    public function get(string $key, string $type = '', $default = null){
+        if(!$this->getParams->exists($key))
+            $res = $default;
+        else
+            $res = $this->getParams->{$key};
+        if(!$type)
+            return $res;
+        return self::callMutator($type, $res);
     }
     public function getAll() : BaseDataObject{
         return $this->getParams;
     }
-    public function post(string $key, string $type = 's'){
-        $res = $this->postParams->{$key};
-        switch ($type){
-            case 'i':
-                return (int)$res;
-            case 'f':
-                return (float)$res;
-            case 'b':
-                if($res && (float)$res != 0 && strtolower($res) != 'false')
-                    return true;
-                return false;
-            case 's':
-            default:
-                return $res ? $res : '';
-        }
+    public function post(string $key, string $type = '', $default = null){
+        if(!$this->postParams->exists($key))
+            $res = $default;
+        else
+            $res = $this->postParams->{$key};
+        if(!$type)
+            return $res;
+        return self::callMutator($type, $res);
     }
     public function postAll() : BaseDataObject{
         return $this->postParams;
