@@ -101,6 +101,7 @@ class UriRequest
     }
 
     /**
+     * Добавляет мутатор для функций get и post.
      * @param string $type текстовый идентификатор для мутатора. Используется в $this->get($key, $type)
      * @param $func Функция-мутатор. Должна принимать значение get или post параметра и возвращать измененное значение
      */
@@ -118,7 +119,7 @@ class UriRequest
     }
 
     /**
-     * Define the current relative URI.
+     * Получает текущий относительный URI.
      * @return string
      */
     public function getUri() : string
@@ -142,11 +143,20 @@ class UriRequest
         return $this->fullPath;
     }
 
+
+    static function mutate_value(string $type, $value){
+        if(!$type)
+            return $value;
+        return self::callMutator($type, $value);
+    }
     /**
      * @param string $key
-     * @param string $type s - string, i - int, f - float, b - bool, j или jo - json_decode($val),
-     *          ja - json_decode($val, true), bdo - BaseDataObject($val)
-     * @param null|mixed $default
+     * @param string $type если пустая строка - возвращается как есть, также имеются встроенные мутаторы -
+     *          s - string, i - int, f - float, b - bool (строка 'false' воспринимается как false,
+     *          j или jo - json_decode($val), ja - json_decode($val, true), bdo - BaseDataObject($val).
+     *          Если указанный мутатор не существует, возвращается само значение.
+     * @param null|mixed $default Значение по умолчанию, возвращаемое при отсутствии параметра с таким ключом.
+     *          Проходит через мутаторы.
      * @return string|int|float|bool
      */
     public function get(string $key, string $type = '', $default = null){
@@ -154,22 +164,37 @@ class UriRequest
             $res = $default;
         else
             $res = $this->getParams->{$key};
-        if(!$type)
-            return $res;
-        return self::callMutator($type, $res);
+        return self::mutate_value($type, $res);
     }
+
+    /**
+     * Возвращает BaseDataObject со всеми get-параметрами.
+     * @return BaseDataObject
+     */
     public function getAll() : BaseDataObject{
         return $this->getParams;
     }
+    /**
+     * @param string $key
+     * @param string $type если пустая строка - возвращается как есть, также имеются встроенные мутаторы -
+     *          s - string, i - int, f - float, b - bool (строка 'false' воспринимается как false,
+     *          j или jo - json_decode($val), ja - json_decode($val, true), bdo - BaseDataObject($val).
+     *          Если указанный мутатор не существует, возвращается само значение.
+     * @param null|mixed $default Значение по умолчанию, возвращаемое при отсутствии параметра с таким ключом.
+     *          Проходит через мутаторы.
+     * @return string|int|float|bool
+     */
     public function post(string $key, string $type = '', $default = null){
         if(!$this->postParams->exists($key))
             $res = $default;
         else
             $res = $this->postParams->{$key};
-        if(!$type)
-            return $res;
-        return self::callMutator($type, $res);
+        return self::mutate_value($type, $res);
     }
+    /**
+     * Возвращает BaseDataObject со всеми post-параметрами.
+     * @return BaseDataObject
+     */
     public function postAll() : BaseDataObject{
         return $this->postParams;
     }
