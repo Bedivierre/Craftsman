@@ -160,10 +160,8 @@ class UriRequest
      * @return string|int|float|bool
      */
     public function get(string $key, string $type = '', $default = null){
-        if(!$this->getParams->exists($key))
+        if(is_null($res = $this->getParams->getDataByPath($key)))
             $res = $default;
-        else
-            $res = $this->getParams->getDataByPath($key);
         return self::mutate_value($type, $res);
     }
 
@@ -185,10 +183,8 @@ class UriRequest
      * @return string|int|float|bool
      */
     public function post(string $key, string $type = '', $default = null){
-        if(!$this->postParams->exists($key))
+        if(is_null($res = $this->postParams->getDataByPath($key)))
             $res = $default;
-        else
-            $res = $this->postParams->getDataByPath($key);
         return self::mutate_value($type, $res);
     }
     /**

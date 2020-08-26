@@ -12,9 +12,10 @@ require_once "../vendor/autoload.php";
 
 $v = new BaseDataObject([
     'q'=>['ss', 1234, 'qwerty'],
-    'f'=>['ss'=>2, 'asde'=>3]
+    'f'=>['ss'=>2, 'asde'=>3],
+    'e'=>'wert'
 ]);
-echo $v->getDataByPath('q.0').":".$v->getDataByPath('f.ss');
+echo $v->getDataByPath('q.0').":".$v->getDataByPath('f.ss').":".$v->getDataByPath('e');
 exit();
 
 
