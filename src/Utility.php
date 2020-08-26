@@ -2,40 +2,42 @@
 namespace Bedivierre\Craftsman;
 use Bedivierre\Craftsman\Aqueduct\BaseResponseObject;
 use Bedivierre\Craftsman\Aqueduct\BaseRequestObject;
+use Bedivierre\Craftsman\Masonry\BaseDataObject;
 
 class Utility
 {
     /**
      * Функция берет элемент массива по его имени, включая вложенные элементы. Разделителем пути по умолчанию
      * являтся '.'
-     * @param array $array Массив, из которого нужно получить данные.
+     * @param array|BaseDataObject $array Массив, из которого нужно получить данные.
      * @param string $path Имя необходимого элемента.
      * @param string $limiter Разделитель для пути.
      * @return array|mixed|null
      */
-    public static function arr_path(array &$array, string $path, string $limiter = '.')
+    public static function arr_path(&$array, string $path, string $limiter = '.')
     {
-        if (!is_array($array))
+        if (!(is_array($array) || ($array instanceof BaseDataObject)))
             return null;
         $p = explode($limiter, $path);
         if (!$p)
             return $array;
-        $count = count($p);
-        $counter = 1;
         $var = $array;
         foreach ($p as $_p) {
-            if ($count == $counter) {
-                if (isset($var[$_p]))
-                    return $var[$_p];
-                else
-                    return null;
-            }
-            if (!isset($var[$_p]) || !is_array($var[$_p]))
+            if(!(is_array($var) || ($var instanceof BaseDataObject)))
                 return null;
-            $var = $var[$_p];
-            $counter++;
+            //только массив и Basedataobject доходят сюда
+            if((is_array($var))) {
+                if (!isset($var[$_p]))
+                    return null;
+                $var = $var[$_p];
+            }
+            else{
+                if(!$var->exists($_p))
+                    return null;
+                $var = $var->{$_p};
+            }
         }
-        return null;
+        return $var;
     }
 
     /**

@@ -163,7 +163,7 @@ class UriRequest
         if(!$this->getParams->exists($key))
             $res = $default;
         else
-            $res = $this->getParams->{$key};
+            $res = $this->getParams->getDataByPath($key);
         return self::mutate_value($type, $res);
     }
 
@@ -188,7 +188,7 @@ class UriRequest
         if(!$this->postParams->exists($key))
             $res = $default;
         else
-            $res = $this->postParams->{$key};
+            $res = $this->postParams->getDataByPath($key);
         return self::mutate_value($type, $res);
     }
     /**
