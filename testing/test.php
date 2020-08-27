@@ -15,6 +15,7 @@ $v = new BaseDataObject([
     'f'=>['ss'=>2, 'asde'=>3],
     'e'=>'wert'
 ]);
+$req = new \Bedivierre\Craftsman\Cartography\UriRequest(new Router());
 echo $v->getDataByPath('q.0').":".$v->getDataByPath('f.ss').":".$v->getDataByPath('e');
 exit();
 

@@ -22,6 +22,7 @@ class UriRequest
     private $fullPath = '';
     private $path = '';
     private $method = '';
+    private $referer = '';
     /**
      * @var BaseDataObject
      */
@@ -47,6 +48,8 @@ class UriRequest
         $this->router = $router;
         $this->basePath = $router->getBasePath();
         $this->method = $router->getRequestMethod();
+        if(isset($_SERVER['HTTP_REFERER']))
+            $this->referer = $_SERVER['HTTP_REFERER'];
 
         self::preset_mutators();
 
@@ -142,6 +145,10 @@ class UriRequest
     {
         return $this->fullPath;
     }
+    public function getReferer() : string
+    {
+        return $this->referer;
+    }
 
 
     static function mutate_value(string $type, $value){
@@ -149,6 +156,7 @@ class UriRequest
             return $value;
         return self::callMutator($type, $value);
     }
+
     /**
      * @param string $key
      * @param string $type если пустая строка - возвращается как есть, также имеются встроенные мутаторы -
@@ -157,10 +165,12 @@ class UriRequest
      *          Если указанный мутатор не существует, возвращается само значение.
      * @param null|mixed $default Значение по умолчанию, возвращаемое при отсутствии параметра с таким ключом.
      *          Проходит через мутаторы.
-     * @return string|int|float|bool
+     * @param string $delimiter разделитель пути в строке.
+     * @param bool $convert_arrays обращает возвращаемый массив как объект BaseDataObject
+     * @return string|int|float|bool|array|BaseDataObject
      */
-    public function get(string $key, string $type = '', $default = null){
-        if(is_null($res = $this->getParams->getDataByPath($key)))
+    public function get(string $key, string $type = '', $default = null, $delimiter = '.', $convert_arrays = false){
+        if(is_null($res = $this->getParams->getDataByPath($key, $convert_arrays, $delimiter)))
             $res = $default;
         return self::mutate_value($type, $res);
     }
@@ -180,10 +190,12 @@ class UriRequest
      *          Если указанный мутатор не существует, возвращается само значение.
      * @param null|mixed $default Значение по умолчанию, возвращаемое при отсутствии параметра с таким ключом.
      *          Проходит через мутаторы.
-     * @return string|int|float|bool
+     * @param string $delimiter разделитель пути в строке.
+     * @param bool $convert_arrays обращает возвращаемый массив как объект BaseDataObject
+     * @return string|int|float|bool|array|BaseDataObject
      */
-    public function post(string $key, string $type = '', $default = null){
-        if(is_null($res = $this->postParams->getDataByPath($key)))
+    public function post(string $key, string $type = '', $default = null, $delimiter = '.', $convert_arrays = false){
+        if(is_null($res = $this->postParams->getDataByPath($key, $convert_arrays, $delimiter)))
             $res = $default;
         return self::mutate_value($type, $res);
     }
